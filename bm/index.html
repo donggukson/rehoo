@@ -78,6 +78,7 @@ td.c{text-align:center}
 /* HUD */
 #hud{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;gap:8px;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   background:color-mix(in srgb,var(--panel) 90%,transparent);border-top:1px solid var(--line);backdrop-filter:blur(8px);z-index:20;flex-wrap:wrap;height:auto}
+#hud a#hublink{font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 12px;text-decoration:none;font-weight:700}
 #hud button,#hud label{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
 #hud button:hover{border-color:var(--brass)} #hud button:focus-visible{outline:3px solid var(--brass)}
 #crumb{flex:1;min-width:0;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} #crumb b{color:var(--ink)}
@@ -349,6 +350,7 @@ body.reader #reader{display:block} body.reader #viewport,body.reader #help{displ
 <div id="reader" aria-label="읽기 모드"></div>
 
 <div id="hud">
+  <a id="hublink" href="../" title="리후 BM 작업실로">⌂ 홈</a>
   <button id="prev" type="button">← 이전</button>
   <button id="next" type="button">다음 →</button>
   <button id="home" type="button">전체 보기</button>

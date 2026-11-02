@@ -28,6 +28,7 @@ h1{font-family:var(--display);font-size:1.8rem;margin:0 0 4px;color:var(--navy);
 .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
 .tabs a{padding:8px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--fg);background:var(--paper);font-weight:500}
 .tabs a.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tabs a.homelink{border-color:var(--stone);color:var(--stone);font-weight:700}
 :root[data-theme="dark"] .tabs a.on{color:#111}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs a.on{color:#111}}
 
@@ -106,7 +107,7 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:7px 9p
   <p class="sub">효인·기헌 대표에게. 아래는 "우리가 이렇게 가정하고 있는데, 이게 맞아?"를 직접 확인해 오는 과제입니다. 방법은 고객 인터뷰든 주변 대표든 유튜브 댓글이든 뭐든 좋고, <b>근거</b>와 <b>대표 의견</b>을 같이 적어 주세요. 숫자가 채워지면 결론 탭에 사업 방향이 자동으로 정리됩니다.</p>
 
   <nav class="tabs" id="tabs">
-    <a href="#result">결론</a><a href="#inputs">조사 과제 (바깥: 시장·고객)</a><a href="#inside">우리 안쪽 (철학·파트너·자원)</a><a href="#sheet">인터뷰 질문지</a>
+    <a href="./" class="homelink" title="리후 BM 작업실로">⌂ 홈</a><a href="#result">결론</a><a href="#inputs">조사 과제 (바깥: 시장·고객)</a><a href="#inside">우리 안쪽 (철학·파트너·자원)</a><a href="#sheet">인터뷰 질문지</a>
   </nav>
 
   <section id="v-result">
