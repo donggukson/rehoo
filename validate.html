@@ -25,6 +25,12 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px
 .wrap{max-width:880px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1{font-family:var(--display);font-size:1.8rem;margin:0 0 4px;color:var(--navy);text-wrap:balance}
 .sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
+.whobar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-left:6px solid var(--stone);padding:12px 14px;margin-bottom:16px}
+.whobar .wl{font-weight:700;color:var(--stone);font-size:.8rem;letter-spacing:.06em}
+.whobar button{background:transparent;color:var(--navy);border:1px solid var(--navy);border-radius:999px;padding:7px 16px}
+.whobar button.on{background:var(--navy);color:#fff}
+:root[data-theme="dark"] .whobar button.on{color:#111}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .whobar button.on{color:#111}}
 .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
 .tabs a{padding:8px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--fg);background:var(--paper);font-weight:500}
 .tabs a.on{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -104,8 +110,11 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:7px 9p
 
 <div class="wrap">
   <h1>리후 대표 조사 과제</h1>
-  <p class="sub">효인·기헌 대표에게. 아래는 "우리가 이렇게 가정하고 있는데, 이게 맞아?"를 직접 확인해 오는 과제입니다. 방법은 고객 인터뷰든 주변 대표든 유튜브 댓글이든 뭐든 좋고, <b>근거</b>와 <b>대표 의견</b>을 같이 적어 주세요. 숫자가 채워지면 결론 탭에 사업 방향이 자동으로 정리됩니다.</p>
+  <p class="sub">효인·기헌 대표에게. 아래는 "우리가 이렇게 가정하고 있는데, 이게 맞아?"를 직접 확인해 오는 과제입니다. 방법은 고객 인터뷰든 주변 대표든 유튜브 댓글이든 뭐든 좋고, <b>근거</b>와 <b>대표 의견</b>을 같이 적어 주세요. 숫자가 채워지면 결론 탭에 사업 방향이 자동으로 정리됩니다. 끝나면 결론 탭에서 <b>시트에 저장</b>을 눌러 주세요.</p>
 
+  <div class="whobar" id="whobar"><span class="wl">기록자</span><button type="button" data-who="백효인">백효인</button><button type="button" data-who="이기헌">이기헌</button><span class="small" id="whomsg">먼저 기록자를 고르면 아래가 열립니다. 두 대표가 각자 따로 적고, 결론 탭에서 서로 판정이 다른 과제를 보여줍니다.</span></div>
+
+  <div id="gate" hidden>
   <nav class="tabs" id="tabs">
     <a href="./" class="homelink" title="리후 BM 작업실로">⌂ 홈</a><a href="#result">결론</a><a href="#inputs">조사 과제 (바깥: 시장·고객)</a><a href="#inside">우리 안쪽 (철학·파트너·자원)</a><a href="#sheet">인터뷰 질문지</a>
   </nav>
@@ -120,17 +129,10 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:7px 9p
       <div class="small" id="progtxt"></div>
       <div class="conflict" id="conflict"></div>
       <div class="btns" id="sheetbar">
-        <label style="flex-direction:row;align-items:center;gap:6px">기록자 <input type="text" id="who" placeholder="효인" style="width:90px"></label>
         <button id="savesheet">시트에 저장</button>
         <button class="ghost" id="loadsheet">시트에서 불러오기</button>
         <span class="small" id="sheetmsg"></span>
       </div>
-      <div class="btns">
-        <button id="copy">결과 복사</button>
-        <button class="ghost" id="reset">입력 초기화</button>
-        <span class="small" id="copied"></span>
-      </div>
-      <textarea id="out" class="out" readonly hidden></textarea>
     </div>
     <div class="note">
       <b>수업 틀로 보면</b> — 바깥(시장·고객) 과제는 교수님 자료의 <b>시장진입 결정요인</b>과 VPC 오른쪽 <b>고객 프로파일</b>을 확인하는 것이고, 안쪽 질문은 BMC 왼쪽 <b>핵심 파트너·자원·활동</b>과 VPC 왼쪽 <b>가치맵</b>을 채우는 것입니다. 판정 규칙은 입력 전에 정해둔 것이라 바꾸지 않습니다. 애매하면 FALSE. 20명 인터뷰는 통계가 아니라 패턴 탐색이라 "경향"으로만 말합니다.
@@ -187,6 +189,7 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:7px 9p
     </ol>
     <div class="note">기록 팁: 직장군은 응답지 뒷면에 적고, 집계는 라벨 가린 채 먼저 한 뒤 붙인다(H4 편향 방지). 응답은 그날 바로 '조사 과제' 탭에 숫자로 넣는다.</div>
   </section>
+  </div><!-- /gate -->
 </div>
 
 <script>
@@ -338,11 +341,19 @@ const PG=[
 ];
 
 // ---------- state ----------
-let S={};
-try{S=JSON.parse(localStorage.getItem('lihu-validate')||'{}')||{}}catch(e){S={}}
-function save(){try{localStorage.setItem('lihu-validate',JSON.stringify(S))}catch(e){}}
-function vals(h){const o={};h.inputs.forEach(([k])=>{o[k]=Number(S[h.id+'.'+k])||0});return o}
-function status(h){try{return h.judge(vals(h))}catch(e){return null}}
+const WHO=['백효인','이기헌'];
+let who=null,ALL={},S={};
+try{ALL=JSON.parse(localStorage.getItem('lihu-validate2')||'{}')||{}}catch(e){ALL={}}
+function save(){if(who)ALL[who]=S;try{localStorage.setItem('lihu-validate2',JSON.stringify(ALL))}catch(e){}}
+function valsOf(h,X){const o={};h.inputs.forEach(([k])=>{o[k]=Number(X[h.id+'.'+k])||0});return o}
+function vals(h){return valsOf(h,S)}
+function statusOf(h,X){try{return h.judge(valsOf(h,X))}catch(e){return null}}
+function status(h){return statusOf(h,S)}
+function selectWho(w){who=w;S=ALL[w]||(ALL[w]={});try{localStorage.setItem('lihu-who',w)}catch(e){}
+  document.querySelectorAll('#whobar button').forEach(b=>b.classList.toggle('on',b.dataset.who===w));
+  document.getElementById('whomsg').textContent=`${w} 대표의 입력입니다. 다른 대표 입력은 버튼을 바꾸면 보입니다.`;
+  document.getElementById('gate').hidden=false;renderInputs();renderInside();renderResult();route();}
+document.querySelectorAll('#whobar button').forEach(b=>b.addEventListener('click',()=>selectWho(b.dataset.who)));
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
 // ---------- render 바깥 ----------
@@ -437,15 +448,14 @@ function renderResult(){
   document.getElementById('prog').innerHTML=H.map(h=>`<span class="${c.st[h.id]===true?'t':c.st[h.id]===false?'f':''}" title="${h.id}"></span>`).join('');
   const done=H.filter(h=>c.st[h.id]!==null).length;
   document.getElementById('progtxt').textContent=`바깥 과제 ${done} / ${H.length} 판정됨 · 안쪽 질문 ${c.pdone} / ${c.ptotal} 답함 · 초록 TRUE, 빨강 FALSE, 회색 미입력`;
-  document.getElementById('conflict').innerHTML=c.conf.length?`<b>숫자와 대표 감이 다른 곳</b> — 여기가 제일 중요한 대화 주제<br>${c.conf.join('<br>')}`:'';
-  const lines=[`[리후 대표 조사 결과] ${new Date().toLocaleDateString('ko-KR')}`,'',c.pos,''];
-  if(c.conf.length)lines.push('숫자와 대표 감이 다른 곳: '+c.conf.join(' / '),'');
-  lines.push('■ 바깥 과제');
-  H.forEach(h=>{const s=c.st[h.id];const v=vals(h);lines.push(`${h.id} ${s===null?'미입력':s?'TRUE':'FALSE'} | ${h.belief}`);lines.push('  입력: '+h.inputs.map(([k,l])=>`${l}=${S[h.id+'.'+k]??'-'}`).join(', '));if(S[h.id+'.ev'])lines.push('  근거: '+S[h.id+'.ev']);if(S[h.id+'.op']||S[h.id+'.ov'])lines.push(`  대표: ${S[h.id+'.ov']==='y'?'맞다':S[h.id+'.ov']==='n'?'아니다':'모르겠다'} ${S[h.id+'.op']||''}`);if(s!==null)lines.push('  → '+(s?h.tt:(typeof h.ff==='function'?h.ff(v):h.ff)))});
-  lines.push('','■ 안쪽 질문');
-  PG.forEach(g=>g.qs.forEach(q=>{lines.push(`${q.id} (${q.to}) ${q.q}`);lines.push('  '+(S[q.id]||'-'))}));
-  lines.push('',...c.cells.map(([k,v])=>`${k}: ${v}`));
-  document.getElementById('out').value=lines.join('\n');
+  const other=WHO.find(w=>w!==who);const O=ALL[other]||{};
+  const diff=H.filter(h=>{const a=c.st[h.id],b=statusOf(h,O);return a!==null&&b!==null&&a!==b}).map(h=>`${h.id}: ${who}는 ${c.st[h.id]?'TRUE':'FALSE'}, ${other}은 ${statusOf(h,O)?'TRUE':'FALSE'}`);
+  const oOp=H.filter(h=>{const a=S[h.id+'.ov'],b=O[h.id+'.ov'];return a&&b&&a!==b}).map(h=>`${h.id}: ${who} "${S[h.id+'.ov']==='y'?'맞다':'아니다'}" vs ${other} "${O[h.id+'.ov']==='y'?'맞다':'아니다'}"`);
+  let box='';
+  if(c.conf.length)box+=`<b>숫자와 대표 감이 다른 곳</b> — 여기가 제일 중요한 대화 주제<br>${c.conf.join('<br>')}`;
+  if(diff.length||oOp.length)box+=(box?'<br><br>':'')+`<b>두 대표가 다르게 본 과제</b> — 같이 앉아서 맞출 것<br>${[...diff,...oOp].join('<br>')}`;
+  document.getElementById('conflict').innerHTML=box;
+
 }
 
 // ---------- tabs ----------
@@ -455,25 +465,11 @@ function route(){let h=(location.hash||'#result').slice(1);if(!VIEWS.includes(h)
   document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+h));}
 window.addEventListener('hashchange',route);
 
-// ---------- buttons ----------
-document.getElementById('copy').addEventListener('click',()=>{
-  const ta=document.getElementById('out');const msg=document.getElementById('copied');
-  const fallback=()=>{ta.hidden=false;ta.focus();ta.select();msg.textContent='아래 텍스트를 길게 눌러 복사하세요.'};
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(()=>{msg.textContent='복사됨. 카톡에 붙여 넣으세요.'}).catch(fallback)}else fallback();
-});
-let armed=false;
-document.getElementById('reset').addEventListener('click',e=>{
-  if(!armed){armed=true;e.target.textContent='정말 지울까요? 다시 누르면 삭제';setTimeout(()=>{armed=false;e.target.textContent='입력 초기화'},4000);return}
-  S={};save();renderInputs();renderInside();renderResult();armed=false;e.target.textContent='입력 초기화';
-});
-
 // ---------- sheet sync ----------
 (function(){
   const bar=document.getElementById('sheetbar'),msg=document.getElementById('sheetmsg');
-  if(!SHEET_URL){bar.querySelectorAll('button,label').forEach(e=>e.hidden=true);msg.textContent='시트 연결 전: 결과 복사로 공유하세요.';return}
-  try{document.getElementById('who').value=localStorage.getItem('lihu-who')||''}catch(e){}
+  if(!SHEET_URL){bar.querySelectorAll('button').forEach(e=>e.hidden=true);msg.textContent='시트 연결 전';return}
   document.getElementById('savesheet').addEventListener('click',async()=>{
-    const who=document.getElementById('who').value.trim()||'익명';try{localStorage.setItem('lihu-who',who)}catch(e){}
     const c=conclude();const ts=new Date().toISOString();
     const rows=H.map(h=>({ts,who,hid:h.id,title:h.belief,
       inputs:h.inputs.map(([k,l])=>`${l}=${S[h.id+'.'+k]??''}`).join(' | ')+(S[h.id+'.ev']?` | 근거: ${S[h.id+'.ev']}`:'')+(S[h.id+'.op']||S[h.id+'.ov']?` | 대표: ${S[h.id+'.ov']==='y'?'맞다':S[h.id+'.ov']==='n'?'아니다':'모르겠다'} ${S[h.id+'.op']||''}`:''),
@@ -487,14 +483,15 @@ document.getElementById('reset').addEventListener('click',e=>{
   document.getElementById('loadsheet').addEventListener('click',async()=>{
     msg.textContent='불러오는 중…';
     try{const r=await fetch(SHEET_URL);const d=await r.json();
-      const latest={};d.rows.forEach(x=>{if(!latest[x.hid]||x.ts>latest[x.hid].ts)latest[x.hid]=x});
-      Object.values(latest).forEach(x=>{let o={};try{o=JSON.parse(x.raw||'{}')}catch(e){}
-        if(/^H\d/.test(x.hid)){Object.entries(o).forEach(([k,v])=>{S[x.hid+'.'+k]=v})}else if(o.a!==undefined){S[x.hid]=o.a}});
-      save();renderInputs();renderInside();renderResult();msg.textContent=`불러옴: ${Object.keys(latest).length}개 항목, 기록자 ${[...new Set(Object.values(latest).map(x=>x.who))].join('·')}`}
+      const latest={};d.rows.forEach(x=>{if(!WHO.includes(x.who))return;const key=x.who+'|'+x.hid;if(!latest[key]||x.ts>latest[key].ts)latest[key]=x});
+      let n=0;Object.values(latest).forEach(x=>{const X=ALL[x.who]||(ALL[x.who]={});let o={};try{o=JSON.parse(x.raw||'{}')}catch(e){}
+        if(/^H\d/.test(x.hid)){Object.entries(o).forEach(([k,v])=>{X[x.hid+'.'+k]=v})}else if(o.a!==undefined){X[x.hid]=o.a}n++});
+      S=ALL[who]||(ALL[who]={});save();renderInputs();renderInside();renderResult();msg.textContent=`불러옴: ${n}개 항목 (${[...new Set(Object.values(latest).map(x=>x.who))].join('·')})`}
     catch(e){msg.innerHTML='불러오기 실패('+esc(e&&e.message||e)+'). <a href="'+SHEET_URL+'" target="_blank" rel="noopener">이 링크</a>를 새 탭에서 열어 {"rows":…} 가 보이면 정상, 로그인 화면이면 Apps Script 배포의 액세스를 "모든 사용자"로 바꾸고 새 버전으로 배포해 주세요.'}
   });
 })();
 
-renderInputs();renderInside();renderResult();route();
+let w0=null;try{w0=localStorage.getItem('lihu-who')}catch(e){}
+if(WHO.includes(w0))selectWho(w0);
 </script>
 </html>
