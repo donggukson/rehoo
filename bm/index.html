@@ -1,0 +1,421 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>리후 가치제안 캔버스</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;800&family=Gaegu:wght@400;700&display=swap">
+<style>
+/* layout: every slide is a 16:9 panel laid on one big table; BMC sits left, the VPC diagram (zoomed-in CS/VP blocks) sits centre with its six panels inside the shapes; the camera fits each panel to the screen */
+:root{
+  --bg:#ECE9E3; --panel:#FAF8F4; --ink:#1C2B48; --muted:#5F6673; --line:#C9C3B8;
+  --navy:#1C2B48; --brass:#A8864F; --brass-soft:#E9DCC3;
+  --pit-y:#FFE98A; --pit-b:#BFE3F5; --pit-g:#CDEBC9; --pit-p:#F9C4CC; --pit-o:#FFD3A8; --pit-ink:#2B2B2B;
+  --good:#2E7D32; --bad:#B23A3A;
+  --shadow:0 8px 24px rgba(28,43,72,.14);
+  --display:"Noto Serif KR",serif; --body:"Noto Sans KR",system-ui,sans-serif; --hand:"Gaegu","Noto Sans KR",cursive;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#1A1D24; --panel:#242830; --ink:#ECE9E3; --muted:#A9AEB8; --line:#3C4250; --navy:#D9E2F3; --brass:#D2B27A; --brass-soft:#4A3F2A;
+  --pit-y:#D9C25A; --pit-b:#7FB5D1; --pit-g:#8FC48A; --pit-p:#D98A96; --pit-o:#D9A36E; --pit-ink:#15171C; --good:#7CC47F; --bad:#E58A8A; --shadow:0 8px 24px rgba(0,0,0,.5); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#1A1D24; --panel:#242830; --ink:#ECE9E3; --muted:#A9AEB8; --line:#3C4250; --navy:#D9E2F3; --brass:#D2B27A; --brass-soft:#4A3F2A;
+  --pit-y:#D9C25A; --pit-b:#7FB5D1; --pit-g:#8FC48A; --pit-p:#D98A96; --pit-o:#D9A36E; --pit-ink:#15171C; --good:#7CC47F; --bad:#E58A8A; --shadow:0 8px 24px rgba(0,0,0,.5); color-scheme:dark }
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;box-sizing:border-box}
+*{box-sizing:border-box}
+h1,h2,h3{text-wrap:balance;margin:0}
+
+#viewport{position:fixed;inset:0;overflow:hidden;background:var(--bg)}
+#stage{position:absolute;left:0;top:0;width:6200px;height:5400px;transform-origin:0 0;transition:transform 1.2s cubic-bezier(.7,0,.3,1);will-change:transform}
+@media (prefers-reduced-motion: reduce){#stage{transition:none}}
+
+/* 16:9 slide panels; all sizes in em so a panel scales with its width (--u = width/1600) */
+.slide{position:absolute;aspect-ratio:16/9;background:var(--panel);border:0.12em solid var(--line);border-radius:.5em;box-shadow:var(--shadow);cursor:pointer;
+  font-size:calc(26px * var(--u,1));padding:1.1em 1.5em;display:flex;flex-direction:column;gap:.35em;overflow:hidden}
+.slide:focus-visible{outline:.25em solid var(--brass);outline-offset:.2em}
+.kicker{font-size:.46em;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);font-weight:700}
+.slide h2{font-family:var(--display);font-size:1.25em;font-weight:800;color:var(--navy);line-height:1.2}
+.gov{font-size:.68em;font-weight:700;color:var(--ink);padding:.45em .8em;border-left:.3em solid var(--brass);background:var(--brass-soft);line-height:1.35}
+.gov b{color:var(--brass);margin-right:.4em}
+.body{font-size:.66em;line-height:1.4;flex:1;min-height:0}
+.body ul{margin:0;padding-left:1.2em} .body li+li{margin-top:.2em} .body p{margin:0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:1.2em;flex:1;min-height:0}
+.cols>div{min-width:0}
+.easy{font-size:.56em;background:var(--pit-y);color:var(--pit-ink);border-radius:.4em;padding:.5em .9em;border:1px dashed rgba(0,0,0,.25);line-height:1.35}
+.easy b{color:#8a1d1d;margin-right:.4em}
+body.noeasy .easy{display:none}
+.tag{display:inline-block;font-size:.72em;font-weight:700;padding:0 .4em;border-radius:.2em;margin-right:.3em;vertical-align:middle;line-height:1.5}
+.tag.f{background:var(--pit-b);color:var(--pit-ink)} .tag.h{background:var(--pit-o);color:var(--pit-ink)} .tag.c{background:var(--pit-p);color:var(--pit-ink)}
+.ok{color:var(--good);font-weight:700} .ng{color:var(--bad);font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:.74em;line-height:1.3}
+th,td{border:1px solid var(--line);padding:.5em .6em;text-align:left;vertical-align:top}
+th{background:var(--brass-soft);color:var(--navy);font-weight:700}
+td.c{text-align:center}
+
+/* post-its */
+.pits{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:.6em;flex:1;min-height:0;align-content:stretch}
+.pit{padding:.45em .55em;background:var(--pit-y);color:var(--pit-ink);font-family:var(--hand);font-size:1.35em;line-height:1.15;font-weight:700;display:flex;flex-direction:column;
+  box-shadow:.12em .18em .5em rgba(0,0,0,.18);transform:rotate(-1.2deg);position:relative;min-height:4.2em}
+.pit::before{content:"";position:absolute;left:50%;top:-.3em;width:2.2em;height:.6em;margin-left:-1.1em;background:rgba(255,255,255,.5);transform:rotate(-2deg)}
+.pit:nth-child(2n){transform:rotate(1.2deg)} .pit:nth-child(3n){transform:rotate(-.5deg)} .pit:nth-child(5n){transform:rotate(1.8deg)}
+.pit.b{background:var(--pit-b)} .pit.g{background:var(--pit-g)} .pit.p{background:var(--pit-p)} .pit.o{background:var(--pit-o)}
+.pit small{display:block;font-family:var(--body);font-size:.6em;font-weight:700;letter-spacing:.06em;opacity:.75;margin-bottom:.15em}
+
+/* BMC grid */
+.bmc{display:grid;grid-template-columns:1fr 1fr 1.15fr 1fr 1fr;grid-template-rows:1fr 1fr .8fr;gap:.35em;flex:1;min-height:0;font-size:.62em}
+.bmc>div{border:1px solid var(--line);border-radius:.3em;padding:.4em .55em;background:var(--bg);min-width:0;overflow:hidden}
+.bmc b.t{display:block;color:var(--navy);font-size:.95em;margin-bottom:.2em}
+.bmc ul{margin:0;padding-left:1.1em} .bmc li+li{margin-top:.1em}
+.bmc .kp{grid-row:1/3;grid-column:1} .bmc .ka{grid-row:1;grid-column:2} .bmc .kr{grid-row:2;grid-column:2} .bmc .cr{grid-row:1;grid-column:4} .bmc .ch{grid-row:2;grid-column:4} .bmc .vp{grid-row:1/3;grid-column:3;background:var(--brass-soft);border-color:var(--brass);border-width:2px} .bmc .cs{grid-row:1/3;grid-column:5;background:var(--brass-soft);border-color:var(--brass);border-width:2px}
+.bmc .cost{grid-column:1/3} .bmc .rev{grid-column:3/6}
+
+/* VPC diagram */
+#vpc{position:absolute;left:2000px;top:1250px;width:4000px;height:1900px}
+#vpc svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#vpc .slide{box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:.4em}
+.thumbs img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:.3em;display:block;max-width:100%}
+
+/* HUD */
+#hud{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;gap:8px;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:color-mix(in srgb,var(--panel) 90%,transparent);border-top:1px solid var(--line);backdrop-filter:blur(8px);z-index:20;flex-wrap:wrap;height:auto}
+#hud button,#hud label{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
+#hud button:hover{border-color:var(--brass)} #hud button:focus-visible{outline:3px solid var(--brass)}
+#crumb{flex:1;min-width:0;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} #crumb b{color:var(--ink)}
+#dots{display:flex;gap:4px} #dots i{width:7px;height:7px;border-radius:50%;background:var(--line);display:block} #dots i.on{background:var(--brass)}
+#help{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));font-size:12px;color:var(--muted);z-index:20;background:color-mix(in srgb,var(--panel) 85%,transparent);padding:4px 10px;border-radius:6px}
+
+/* reader (narrow screens) */
+#reader{display:none;position:fixed;inset:0;overflow:auto;background:var(--bg);padding:16px max(16px,env(safe-area-inset-right,0px)) 100px max(16px,env(safe-area-inset-left,0px));z-index:15}
+#reader .slide{position:static;width:auto!important;aspect-ratio:auto;margin-bottom:16px;cursor:default;box-shadow:none;font-size:14px!important;overflow:visible}
+#reader .pits{grid-template-columns:1fr 1fr} #reader .pit{transform:none}
+#reader .cols,#reader .bmc{grid-template-columns:1fr;grid-template-rows:none} #reader .bmc>div{grid-row:auto;grid-column:auto}
+#reader table{display:block;overflow-x:auto}
+body.reader #reader{display:block} body.reader #viewport,body.reader #help{display:none}
+</style>
+
+<div id="help">← → 이동 · Esc 전체 · 클릭 시 확대</div>
+
+<div id="viewport"><div id="stage">
+
+  <!-- ROW A : 제안 / 시장 / 리후 -->
+  <section class="slide" data-frame="title" tabindex="0" style="left:200px;top:120px;width:1600px">
+    <div class="kicker">공학경영세미나 · 기말과제 · 비즈니스 모델과 고객검증</div>
+    <h2>누구에게, 어떤 가치를 — 리후디자인 × 손동국</h2>
+    <div class="gov"><b>거버닝</b> '하고 싶은 것'이 아니라 '고객이 돈을 내는 이유'에서 출발하고 있음 — 사업 구조(BMC)에서 고객·가치 두 칸을 확대(VPC)해 맞물림을 검사함</div>
+    <div class="cols">
+      <div class="body"><ul>
+        <li>읽는 순서 : 사업 구조 한 장(BMC) → 그중 고객 세그먼트·가치제안 두 칸을 확대한 캔버스(VPC) → 고객 쪽 3영역, 우리 쪽 3영역 → 맞물림(FIT) → 시장 적합성 판정 → 검증</li>
+        <li>포스트잇 색 = 근거 등급. <span class="tag f">사실</span>공개 정보·관찰 <span class="tag h">가설</span>검증 전 추정 <span class="tag c">반증</span>틀릴 수 있는 이유와 확인 방법</li>
+        <li>판정 원칙 : 좋아 보이는 가설도 반증을 옆에 붙임. 짝 없는 기능은 버림. 기각되는 가설도 결과임</li>
+      </ul></div>
+      <div class="thumbs"><img src="img/vanity.jpg" alt="파우더룸 플로팅 스톤 세면대"><img src="img/entry.jpg" alt="현관 플로팅 신발장"><img src="img/bench.jpg" alt="복도 니치 우드 벤치"><img src="img/comp.jpg" alt="벤치 대리석 인레이 합성 시안"></div>
+    </div>
+    <div class="easy"><b>쉽게 말하면</b> 사업이 될지 안 될지는 우리가 뭘 잘하느냐가 아니라, 누가 무엇 때문에 돈을 내느냐로 정해집니다. 그래서 이 자료는 전부 '고객 쪽'에서 시작합니다.</div>
+  </section>
+
+  <section class="slide" data-frame="market" tabindex="0" style="left:2300px;top:120px;width:1600px">
+    <div class="kicker">시장 배경</div><h2>인쇼 = 지배적 디자인, 병목은 실행력</h2>
+    <div class="gov"><b>거버닝</b> 표준은 이미 정해졌고 고객 눈높이는 올라갔으며, 그 표준을 시공까지 해내는 손은 극소수임</div>
+    <div class="body"><ul>
+      <li><span class="tag f">사실</span>인테리어쇼가 하이엔드 가정 인테리어의 형식을 대중에게 가르쳤고, 아카데미로 업체도 교육함 — 리후도 수료</li>
+      <li><span class="tag h">가설</span>형식이 굳으면 경쟁은 '어떤 스타일'에서 '누가 믿을 수 있게 해내나'로 이동함</li>
+      <li><span class="tag c">반증</span>표준이 굳을수록 모방 업체가 늘어 가격 경쟁이 심해질 수 있음 → 확인 : 경기 남부 '인쇼 스타일' 표방 업체 수·㎡당 단가 조사</li>
+      <li><span class="tag c">반증</span>인쇼 브랜드는 사용 불가, 수료 표기도 규정 확인 → 자기 브랜드가 전제</li>
+    </ul></div>
+    <div class="easy"><b>쉽게 말하면</b> 스마트폰이 다 아이폰 모양이 된 것처럼 '다들 이게 맞다'는 형식이 생기는 걸 지배적 디자인이라고 합니다. 형식이 정해지면 돈은 '얼마나 잘, 얼마나 믿을 수 있게 만드느냐'로 갑니다.</div>
+  </section>
+
+  <section class="slide" data-frame="company" tabindex="0" style="left:4400px;top:120px;width:1600px">
+    <div class="kicker">리후 진단</div><h2>핵심 역량은 '되돌리기 어려운 공정을 대표가 직접'</h2>
+    <div class="gov"><b>거버닝</b> 설비·방수·바닥을 대표가 직접 하고 형식이 고정되면 최고 완성도로 반복함 — 다만 그 희소함이 고객에게 보이지 않고 있음</div>
+    <div class="cols">
+      <div class="body"><b>잘하는 것</b><ul><li>매립수전·배관 등 설비 직접 시공</li><li>미장·수평몰탈·곰방 등 기초 공정</li><li>인쇼 형식을 시공까지 구현하는 몇 안 되는 손</li><li>형식 고정 시 반복 품질 높음</li></ul></div>
+      <div class="body"><b>부족한 것</b><ul><li>홍보·영업 — 후킹 장치 없음</li><li>프로세스 — 견적·공정·소통이 사람 손</li><li>디자인·색감 — 형식 없으면 결과가 흔들림</li><li><span class="tag c">반증</span>'대표 직접'은 건수 상한을 만듦 → 프리미엄 소량이 전제</li></ul></div>
+    </div>
+    <div class="easy"><b>쉽게 말하면</b> 남보다 확실히 잘하는 한 가지를 핵심 역량이라고 합니다. '벽 닫기 전 공정을 대표가 직접'은 고객이 돈 내는 이유가 되고 남이 쉽게 못 따라합니다. 나머지는 빌리거나, 표준으로 만들거나, 자동화로 메웁니다.</div>
+  </section>
+
+  <!-- ROW B : BMC (left) + VPC diagram (centre) -->
+  <section class="slide" data-frame="bmc" tabindex="0" style="left:200px;top:1250px;width:1600px">
+    <div class="kicker">비즈니스 모델 캔버스 (BMC)</div><h2>사업 구조 한 장 — 가운데 두 칸을 오른쪽 캔버스로 확대함</h2>
+    <div class="gov"><b>거버닝</b> 합성·큐레이션·견적은 비용이 거의 안 들고 시공은 건당 변동비임 — 재고·공장 없이 작게 검증할 수 있는 구조로 짜고 있음</div>
+    <div class="bmc">
+      <div class="kp"><b class="t">핵심 파트너</b><ul><li>손동국(디자인 디렉션·AI 프로세스)</li><li>자재·석재 공급처</li><li>목공·조명 외주</li><li>(후) 제휴 업체</li></ul></div>
+      <div class="ka"><b class="t">핵심 활동</b><ul><li>공간 표준·팔레트 레시피화</li><li>집 사진 합성·견적 자동화</li><li>대표 직접 시공 + 공정 리포트</li></ul></div>
+      <div class="vp"><b class="t">가치제안 → VPC 왼쪽</b><ul><li>공사 전에 내 집에서 결과를 본다</li><li>되돌리기 어려운 공정은 대표가 직접, 사진으로 증명</li><li>인쇼 표준을 공간 단위로 확정가·확정 공기</li><li>이 급을 이 가격에(레퍼런스 대비)</li><li>(삼성) 할인 가전을 살리는 빌트인 플랜</li></ul></div>
+      <div class="cr"><b class="t">고객 관계</b><ul><li>유료 시안으로 선별</li><li>공정 리포트·체크포인트</li><li>완성 촬영본 → 고객이 홍보</li></ul></div>
+      <div class="cs"><b class="t">고객 세그먼트 → VPC 오른쪽</b><ul><li>① 경기 남부 반도체 종사자(삼성 / 하이닉스 분리)</li><li>② 한두 공간만 바꾸고 싶은 거주자(이사·신혼)</li><li>③ 리뉴얼 주기 카페·스몰브랜드</li></ul></div>
+      <div class="kr"><b class="t">핵심 자원</b><ul><li>인쇼 표준을 구현하는 시공력(희소)</li><li>실제 시공된 카탈로그(자택)</li><li>레퍼런스·가격 DB, 리포트 아카이브</li></ul></div>
+      <div class="ch"><b class="t">채널</b><ul><li>자택·현장 사진 콘텐츠</li><li>사내 커뮤니티·지인 소개(세그먼트 ①)</li><li>인쇼 스타일 검색 수요</li></ul></div>
+      <div class="cost"><b class="t">비용 구조</b><ul><li>시공 원가·자재(건당 변동비) · 합성·견적 툴(준고정) · 재고·공장 없음</li></ul></div>
+      <div class="rev"><b class="t">수익원</b><ul><li>시안비 → 한 장면 패키지 마진(S/M/L) → 소재·가전 플랜 옵션 → (후) 레시피·툴 라이선스</li></ul></div>
+    </div>
+    <div class="easy"><b>쉽게 말하면</b> 사업을 9칸에 적는 이유는 '빠진 칸'을 찾기 위해서입니다. 리후는 왼쪽(만드는 힘)은 찼는데 오른쪽(누구에게 무엇을 약속하나)이 비어 있었습니다. 그 두 칸을 다음 장에서 크게 봅니다.</div>
+  </section>
+
+  <div id="vpc">
+    <svg viewBox="0 0 4000 1900" aria-hidden="true">
+      <!-- square 1800 at (0,50) ; circle r=900 at (3050,950) -->
+      <rect x="4" y="54" width="1792" height="1792" fill="none" stroke="#1C2B48" stroke-width="6" opacity=".85"/>
+      <line x1="4" y1="54" x2="900" y2="950" stroke="#1C2B48" stroke-width="3" opacity=".85"/>
+      <line x1="4" y1="1846" x2="900" y2="950" stroke="#1C2B48" stroke-width="3" opacity=".85"/>
+      <line x1="900" y1="950" x2="1796" y2="950" stroke="#1C2B48" stroke-width="3" opacity=".85"/>
+      <line x1="1830" y1="950" x2="2120" y2="950" stroke="#A8864F" stroke-width="6" marker-end="url(#ar)" marker-start="url(#al)"/>
+      <circle cx="3050" cy="950" r="896" fill="none" stroke="#1C2B48" stroke-width="6" opacity=".85"/>
+      <line x1="3050" y1="950" x2="2154" y2="950" stroke="#1C2B48" stroke-width="3" opacity=".85"/>
+      <line x1="3050" y1="950" x2="3498" y2="174" stroke="#1C2B48" stroke-width="3" opacity=".85"/>
+      <line x1="3050" y1="950" x2="3498" y2="1726" stroke="#1C2B48" stroke-width="3" opacity=".85"/>
+      <defs><marker id="ar" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#A8864F"/></marker>
+      <marker id="al" markerWidth="12" markerHeight="12" refX="2" refY="6" orient="auto"><path d="M12,0 L0,6 L12,12 z" fill="#A8864F"/></marker></defs>
+      <text x="40" y="20" font-size="34" font-weight="800" fill="#A8864F" font-family="Noto Serif KR,serif">VALUE MAP · 밸류맵 (가치제안 칸의 확대)</text>
+      <text x="2500" y="20" font-size="34" font-weight="800" fill="#A8864F" font-family="Noto Serif KR,serif">CUSTOMER PROFILE · 고객 프로파일 (세그먼트 칸의 확대)</text>
+    </svg>
+
+    <!-- Products & Services : left triangle -->
+    <section class="slide" data-frame="products" tabindex="0" style="left:60px;top:753px;width:700px;--u:.4375">
+      <div class="kicker">Products &amp; Services · 제품·서비스</div><h2>'확인된 한 장면'을 팔고 있음</h2>
+      <div class="gov"><b>거버닝</b> 카탈로그·미리보기·직접 시공·확정가 4종 묶음임 — 각 항목은 오른쪽 고객 포스트잇에 짝이 있어야 살아남음</div>
+      <div class="pits">
+        <div class="pit g"><small>상품</small>공간 표준 5종 × 팔레트 3종 카탈로그</div>
+        <div class="pit g"><small>상품</small>집 사진 합성 미리보기 24h · 유료 · 계약 시 차감</div>
+        <div class="pit g"><small>상품</small>되돌리기 어려운 공정 대표 직접 + 사진 리포트</div>
+        <div class="pit g"><small>상품</small>한 장면 확정가 S/M/L · 확정 공기</div>
+        <div class="pit o"><small>옵션(삼성)</small>할인 가전 추천 + 빌트인 디테일 플랜</div>
+        <div class="pit o"><small>옵션</small>자투리 대리석 인레이 등 소재 업그레이드</div>
+      </div>
+      <div class="easy"><b>쉽게 말하면</b> 효인 대표의 손기술을 '메뉴판'으로 만드는 겁니다. 메뉴가 있어야 고객이 고를 수 있고, 우리는 반복해서 잘 만들 수 있습니다.</div>
+    </section>
+
+    <!-- Gain Creators : top right of square -->
+    <section class="slide" data-frame="gaincreators" tabindex="0" style="left:1020px;top:110px;width:720px;--u:.45">
+      <div class="kicker">Gain Creators · 혜택 창출</div><h2>'이 급을 이 가격에'를 숫자로 보여주고 있음</h2>
+      <div class="gov"><b>거버닝</b> 비교표·스펙·가전 할인 활용이 숫자로 판단하는 고객의 언어라고 보고 있음</div>
+      <div class="pits">
+        <div class="pit g"><small>기대 충족</small>확정 결과·예산·일정 — 시안=견적=계약</div>
+        <div class="pit g"><small>요구 충족</small>해외 레퍼런스 vs 우리 : 가격·스펙·공기 비교표</div>
+        <div class="pit g"><small>요구 충족</small>소재·조명 스펙을 숫자로(연색성·두께·내구)</div>
+        <div class="pit o"><small>놀람(삼성)</small>할인 가전의 가치를 살리는 빌트인 플랜</div>
+        <div class="pit g"><small>놀람</small>완성 촬영본 — 자랑 자산</div>
+        <div class="pit p"><small>반증</small>비교에 강한 고객은 비교 후 '더 싼 데'로 갈 수 있음 → 근거 제시 후 수용가 vs 최저가 선택률</div>
+      </div>
+      <div class="easy"><b>쉽게 말하면</b> 300만 원은 비싸게 들리지만 '해외 브랜드면 1,000만 원인 걸 300만 원에'는 싸게 들립니다. 비교 기준을 우리가 먼저 주는 게 핵심입니다.</div>
+    </section>
+
+    <!-- Pain Relievers : bottom right of square -->
+    <section class="slide" data-frame="painrelievers" tabindex="0" style="left:1020px;top:1385px;width:720px;--u:.45">
+      <div class="kicker">Pain Relievers · 불만 해결</div><h2>되돌릴 수 없다는 공포를 세 시점의 가시화로 풀고 있음</h2>
+      <div class="gov"><b>거버닝</b> 공사 전 미리보기 · 공사 중 리포트 · 공사 후 촬영 — 신뢰 축 Pain에 정면 대응함</div>
+      <div class="pits">
+        <div class="pit b"><small>신뢰</small>공사 전 : 내 집 사진 위의 결과를 본다(지을 수 있는 것만)</div>
+        <div class="pit b"><small>신뢰</small>공사 중 : 벽 닫기 전 사진 + 되돌림 가능 체크포인트</div>
+        <div class="pit b"><small>돈</small>정찰 S/M/L — 비교 불가·추가비용 불안 제거</div>
+        <div class="pit b"><small>시간</small>3택1 큐레이션 — 바쁜 고객의 결정 피로 감소 / 공기 확정</div>
+        <div class="pit b"><small>안목</small>레퍼런스·스펙 카드 — 용어 몰라도 판단 가능</div>
+        <div class="pit p"><small>반증</small>리포트가 걱정을 키울 수 있음(과정의 거친 모습) → 1차 프로토타입에서 반응 측정</div>
+      </div>
+      <div class="easy"><b>쉽게 말하면</b> 불안은 설명으로 안 없어지고 보여줘야 없어집니다. 배관을 직접 하는 건 지금도 사실인데 고객은 벽이 닫힌 뒤에 와서 모릅니다. 닫기 전 사진 한 장이 그 기술을 돈 내는 이유로 바꿉니다.</div>
+    </section>
+
+    <!-- Gains : top-left of circle -->
+    <section class="slide" data-frame="gains" tabindex="0" style="left:2380px;top:300px;width:640px;--u:.4">
+      <div class="kicker">Gains · 혜택</div><h2>기대·요구·놀람 3층으로 나누고 있음</h2>
+      <div class="gov"><b>거버닝</b> '휴식되는 집'과 '따뜻함'은 아직 가설임 — 검증 전엔 차별화 축으로 쓰지 않음</div>
+      <div class="pits">
+        <div class="pit y"><small>기대</small>정해진 결과·예산·날짜</div>
+        <div class="pit y"><small>요구 · 가설</small>퇴근 후 쉬는 집 — 따뜻하고 조용한 분위기</div>
+        <div class="pit y"><small>요구 · 가설</small>같은 돈이면 더 나은 것 — 비교 근거를 원함</div>
+        <div class="pit y"><small>놀람</small>손님이 '이거 뭐예요?' 하는 한 장면</div>
+        <div class="pit y"><small>놀람(삼성)</small>산 김에 제대로 — 할인 가전이 돋보이는 집</div>
+        <div class="pit p"><small>반증</small>따뜻함 선호는 추정 — 차갑고 미니멀한 취향도 많음 → 팔레트 3종 선호 설문</div>
+      </div>
+      <div class="easy"><b>쉽게 말하면</b> '기대'는 당연히 받아야 하는 것, '요구'는 말로 하는 것, '놀람'은 말 안 했는데 받으면 좋아하는 것. 세 층을 나눠야 뭘 기본으로 넣고 뭘 차별화로 쓸지 정해집니다.</div>
+    </section>
+
+    <!-- Customer Jobs : right wedge -->
+    <section class="slide" data-frame="jobs" tabindex="0" style="left:3160px;top:770px;width:640px;--u:.4">
+      <div class="kicker">Customer Jobs · 고객의 할 일</div><h2>기능·감정·사회의 일을 동시에 하고 있음</h2>
+      <div class="gov"><b>거버닝</b> 감정의 일(후회 없는 결정)이 결정을 지배한다고 보고 있음 — 인터뷰로 확인 전까지는 가설임</div>
+      <div class="pits">
+        <div class="pit y"><small>기능</small>예산 안에서 한두 공간을 하이엔드로</div>
+        <div class="pit y"><small>기능</small>이사·입주 일정에 맞춰 끝내기, 결정 최소화</div>
+        <div class="pit y"><small>감정</small>후회 없는 결정, 안심하고 맡기기</div>
+        <div class="pit y"><small>감정 · 가설</small>바쁜 일상의 보상 — 집에서 회복하기</div>
+        <div class="pit y"><small>사회</small>동료·지인에게 안목 있어 보이기</div>
+        <div class="pit p"><small>반증</small>바쁘면 인테리어를 아예 미룸 → 보너스 용처 1순위(저축·대출·투자·집) 설문</div>
+      </div>
+      <div class="easy"><b>쉽게 말하면</b> 고객은 벽지를 사는 게 아니라 '후회 안 할 결정'과 '쉬는 집'을 사러 옵니다. 그 일을 대신 잘 끝내주는 게 우리 상품입니다.</div>
+    </section>
+
+    <!-- Pains : bottom-left of circle -->
+    <section class="slide" data-frame="pains" tabindex="0" style="left:2380px;top:1240px;width:640px;--u:.4">
+      <div class="kicker">Pains · 불만</div><h2>돈·시간·신뢰·안목 4축으로 빠짐없이 나누고 있음</h2>
+      <div class="gov"><b>거버닝</b> 가장 무거운 축은 신뢰(되돌릴 수 없음)로 보고 있음 — 순위는 우리가 정하지 않고 중요도×빈도로 잼</div>
+      <div class="pits">
+        <div class="pit y"><small>신뢰</small>되돌릴 수 없음 · 시안≠결과 · 업체 불신</div>
+        <div class="pit y"><small>돈</small>견적 불투명, 비교 불가, 추가비용</div>
+        <div class="pit y"><small>시간</small>공사 중 생활 중단, 바쁜데 결정 요구가 많음</div>
+        <div class="pit y"><small>안목</small>용어·소재를 몰라 판단 어려움, 남들 다 하는 것</div>
+        <div class="pit y"><small>안목(삼성)</small>할인 가전을 샀는데 집과 안 어울림</div>
+        <div class="pit p"><small>반증</small>'신뢰 1순위'는 추정 — 가격이 1순위일 수 있음 → 인터뷰 10명 중요도×빈도</div>
+      </div>
+      <div class="easy"><b>쉽게 말하면</b> 고객의 괴로움을 네 서랍(돈·시간·신뢰·안목)에 빠짐없이 나눠 넣었습니다. 어느 서랍이 제일 무거운지는 우리가 정하지 않고 인터뷰로 잽니다.</div>
+    </section>
+  </div>
+
+  <!-- ROW C : FIT / 시장 적합성 / 세그먼트 -->
+  <section class="slide" data-frame="fit" tabindex="0" style="left:200px;top:3300px;width:1600px">
+    <div class="kicker">FIT · 맞물림 검사</div><h2>우리가 주는 것마다 고객 쪽 짝이 있는가</h2>
+    <div class="gov"><b>거버닝</b> 짝이 있는 기능만 남기고 있음 — 짝이 '가설'에만 걸린 기능은 보류, 짝이 없는 기능은 버림</div>
+    <table>
+      <tr><th style="width:26%">우리가 주는 것</th><th style="width:30%">고객 쪽 짝 (Jobs / Pains / Gains)</th><th style="width:12%">짝의 근거</th><th>판정</th></tr>
+      <tr><td>집 사진 합성 미리보기</td><td>Pain 신뢰 : 되돌릴 수 없음·시안≠결과</td><td><span class="tag h">가설</span></td><td class="ok">유지 — H1·H2로 검증</td></tr>
+      <tr><td>대표 직접 시공 + 공정 리포트</td><td>Pain 신뢰 : 업체 불신 / Job 감정 : 안심</td><td><span class="tag f">관찰</span></td><td class="ok">유지 — 핵심</td></tr>
+      <tr><td>확정가 S/M/L</td><td>Pain 돈 : 견적 불투명·추가비용</td><td><span class="tag f">관찰</span></td><td class="ok">유지</td></tr>
+      <tr><td>레퍼런스 대비 비교표·스펙</td><td>Gain 요구 : 비교 근거(공대형 고객)</td><td><span class="tag h">가설</span></td><td>보류 — H3로 판정</td></tr>
+      <tr><td>3택1 큐레이션·따뜻한 팔레트</td><td>Job 감정 : 쉬는 집 / Pain 시간 : 결정 피로</td><td><span class="tag h">가설</span></td><td>보류 — 팔레트 선호 설문</td></tr>
+      <tr><td>할인 가전 연계 빌트인 플랜</td><td>Gain 놀람 / Pain 안목 — 삼성 직원 한정</td><td><span class="tag h">가설</span></td><td>보류 — H6, 하이닉스 세그먼트엔 제외</td></tr>
+      <tr><td>대리석 인레이 옵션</td><td>Gain 놀람 : 손님이 묻는 장면</td><td><span class="tag h">가설</span></td><td class="ng">옵션으로 격하 — 짝이 약함</td></tr>
+    </table>
+    <div class="easy"><b>쉽게 말하면</b> 우리가 만들고 싶은 것 목록을 고객이 원하는 것 목록에 하나씩 꽂아 봅니다. 안 꽂히면 아무리 멋져도 뺍니다. 꽂히긴 하는데 추측으로만 꽂히면 '보류'입니다.</div>
+  </section>
+
+  <section class="slide" data-frame="market-fit" tabindex="0" style="left:2300px;top:3300px;width:1600px">
+    <div class="kicker">시장 적합성 판정</div><h2>이 사업이 시장에 충분한가, 불충분한가</h2>
+    <div class="gov"><b>거버닝</b> 적합 징후와 불충분 징후를 같은 무게로 적어 두고 있음 — 어느 쪽 신호가 먼저 쌓이는지로 판정함</div>
+    <div class="cols">
+      <div class="body"><b class="ok">적합하다고 볼 징후</b><ul>
+        <li>유료 미리보기 결제율 ≥ 30% (실물 없이 돈을 냄)</li><li>인터뷰에서 '되돌릴 수 없음'이 상위 2위 안 ≥ 60%</li><li>근거 카드 제시 후 수용가가 오름(+20%p)</li><li>리후가 5종 중 4종을 확정가·확정 공기로 가능하다고 함</li><li>세그먼트 ①의 보너스 용처 상위 3위 안에 '집'</li>
+      </ul></div>
+      <div class="body"><b class="ng">불충분하다고 볼 징후</b><ul>
+        <li>미리보기 신청은 있는데 결제가 없음 → 구경 수요뿐</li><li>가격이 1순위 Pain → 하이엔드 소량 모델과 어긋남</li><li>비교 후 최저가 선택률이 높음 → 앵커링 실패</li><li>건수 상한(대표 직접)으로 월 매출이 생계선 미달</li><li>모방 업체가 같은 '한 장면 정찰'을 더 싸게 냄</li>
+      </ul></div>
+    </div>
+    <div class="body"><b>시장 크기 가늠(페르미, 전부 추정)</b> 경기 남부 반도체 종사자 수만 명 × 연간 이사·리모델링 의향 10~20% × 한 장면 전환율 1~3% → 연 수백 건 규모의 후보 수요. 리후의 월 가능 건수(수 건)보다 크면 '좁지만 충분', 작으면 세그먼트 교체. <span class="tag c">반증</span>의향·전환율 가정 자체를 설문으로 교체해야 함</div>
+    <div class="easy"><b>쉽게 말하면</b> '될 것 같다'를 믿지 말고, 되면 이런 숫자가 나오고 안 되면 저런 숫자가 나온다를 미리 적어 둡니다. 그래야 나중에 보고 싶은 것만 보지 않습니다.</div>
+  </section>
+
+  <section class="slide" data-frame="segment" tabindex="0" style="left:4400px;top:3300px;width:1600px">
+    <div class="kicker">타깃 세그먼트 (1순위 가설)</div><h2>경기 남부 반도체 종사자 — 돈·눈높이·비교 성향</h2>
+    <div class="gov"><b>거버닝</b> 가처분소득이 늘었고 거주지가 모여 있으며 숫자로 비교하는 사람들이라 '근거 있는 하이엔드'가 먹힐 것으로 보고 있음 — 핵심 가정 4개는 전부 검증 대상임</div>
+    <div class="cols">
+      <div class="body"><b>사실 (공개 정보)</b><ul>
+        <li><span class="tag f">사실</span>삼성전자·SK하이닉스의 대규모 성과급 지급이 보도됨</li>
+        <li><span class="tag f">사실</span>사업장이 수원·화성·용인·평택·이천에 집중 → 거주지도 경기 남부 밀집</li>
+        <li><span class="tag f">사실</span>삼성 임직원은 패밀리넷으로 자사 가전 할인 구매 가능(하이닉스 해당 없음)</li>
+        <li><span class="tag f">관찰</span>공대 출신 비중이 높고 업무에서 숫자·비교가 일상</li>
+      </ul></div>
+      <div class="body"><b>가설 → 반증 → 확인</b><ul>
+        <li><span class="tag h">가설</span>이사·리모델링 수요↑ <span class="tag c">반증</span>보너스는 저축·대출 상환·투자 우선일 수 있음 → 용처 설문 n≥20</li>
+        <li><span class="tag h">가설</span>휴식·따뜻함 선호 <span class="tag c">반증</span>취향은 분산 → 팔레트 3종 선호 조사</li>
+        <li><span class="tag h">가설</span>비교·근거 중시 → 앵커링이 통함 <span class="tag c">반증</span>비교 후 최저가 → 근거 카드 A/B</li>
+        <li><span class="tag h">가설</span>가전 연계가 가치 <span class="tag c">반증</span>신축 입주면 이미 빌트인·옵션 → 입주 형태(신축/구축) 조사</li>
+      </ul></div>
+    </div>
+    <div class="easy"><b>쉽게 말하면</b> '돈이 생긴 사람들이 집에 쓴다'는 그럴듯하지만 확인 안 된 추측입니다. 그럴듯한 말마다 '틀릴 수 있는 이유'를 옆에 붙여 두고, 20명한테 물어본 뒤에 믿기로 했습니다. 삼성과 하이닉스는 가전 할인 유무가 달라 따로 셉니다.</div>
+  </section>
+
+  <!-- ROW D : 검증 / 구조·역할 -->
+  <section class="slide" data-frame="validate" tabindex="0" style="left:1250px;top:4330px;width:1600px">
+    <div class="kicker">검증 · 확증편향 방지</div><h2>가장 싼 실험부터, 기각도 결과</h2>
+    <div class="gov"><b>거버닝</b> 실물 없이 합성 시안만으로 수요를 먼저 재고 있음 — 가설마다 성공 기준과 '틀렸을 때 바꿀 것'을 미리 적어 둠</div>
+    <table>
+      <tr><th>#</th><th>가설(측정 가능하게)</th><th>성공 기준</th><th>기각 시 바꿀 것</th></tr>
+      <tr><td>H1</td><td>신뢰(되돌릴 수 없음)가 최상위 Pain</td><td>인터뷰 10명, 상위 2위 안 60%</td><td>가격 중심 상품으로 재설계</td></tr>
+      <tr><td>H2</td><td>유료 합성 미리보기에 돈을 냄</td><td>신청 20건 중 결제 30%</td><td>미리보기는 무료 후킹으로 전환</td></tr>
+      <tr><td>H3</td><td>근거 카드가 지불의향을 올림</td><td>A/B 수용률 +20%p</td><td>앵커링 대신 레퍼런스 사진만</td></tr>
+      <tr><td>H4</td><td>반도체 종사자 보너스 용처에 '집'이 상위 3위</td><td>설문 n≥20</td><td>세그먼트를 '이사·신혼'으로 교체</td></tr>
+      <tr><td>H5</td><td>리후가 공간 5종을 확정가·확정 공기로 반복 가능</td><td>레시피표 검토 5개 중 4개</td><td>2~3종으로 축소</td></tr>
+      <tr><td>H6</td><td>가전 연계 플랜 선호(삼성 직원)</td><td>10명 중 5명 '검토'</td><td>옵션에서 제외</td></tr>
+    </table>
+    <div class="easy"><b>쉽게 말하면</b> 큰돈 쓰기 전에 작은 실험으로 확인합니다. 중요한 건 '맞으면 좋고'가 아니라 '틀리면 뭘 바꿀지'를 먼저 적어 두는 겁니다. 시안은 반드시 '예상 시안'이라고 밝힙니다.</div>
+  </section>
+
+  <section class="slide" data-frame="roles" tabindex="0" style="left:3350px;top:4330px;width:1600px">
+    <div class="kicker">실행 구조 · 역할</div><h2>손은 시공, 머리와 시스템은 자동화</h2>
+    <div class="gov"><b>거버닝</b> 효인은 시공·현장에만 집중하고, 후킹·견적·공정관리는 동국이 AI로 떼어내고 있음 — 사람을 더 뽑지 않고 체계를 갖춤</div>
+    <div class="cols">
+      <div class="body"><b>백효인 — 시공·현장</b><ul><li>설비·방수·바닥 직접 시공</li><li>공간 표준의 시공 레시피 확정(순서·자재·공기)</li><li>시공자 네트워크 운영, 현장 사진</li></ul></div>
+      <div class="body"><b>손동국 — 디자인·프로세스</b><ul><li>공간 표준 × 팔레트 설계(자택이 1호 사례)</li><li>집 사진 합성 미리보기 제작·자동화</li><li>견적·공정표·리포트 자동 생성, 콘텐츠·채널</li></ul></div>
+    </div>
+    <div class="body"><b>AI 3곳</b> ① 후킹(집 사진 → 합성 시안) ② 견적(규격품 → 자동 산출) ③ 공정 관리(현장 사진 → 일일 리포트) · <span class="tag c">반증</span>자동화가 '정성'을 지운다고 느낄 수 있음 → 리포트는 대표 명의 한 줄 코멘트 동반</div>
+    <div class="easy"><b>쉽게 말하면</b> 사람을 더 뽑으면 고정비가 늘어 더 위험해집니다. 규칙이 있는 일은 AI로 거의 자동화되니, 효인 대표는 시공에만 시간을 쓰면 됩니다.</div>
+  </section>
+
+</div></div>
+
+<div id="reader" aria-label="읽기 모드"></div>
+
+<div id="hud">
+  <button id="prev" type="button">← 이전</button>
+  <button id="next" type="button">다음 →</button>
+  <button id="home" type="button">전체 보기</button>
+  <span id="crumb"></span>
+  <span id="dots"></span>
+  <label><input type="checkbox" id="easy" checked> 쉽게 말하면</label>
+  <label><input type="checkbox" id="rmode"> 읽기 모드</label>
+</div>
+
+<script>
+(function(){
+  const stage=document.getElementById('stage'), vp=document.getElementById('viewport'), hud=document.getElementById('hud');
+  const SW=6200, SH=5400;
+  const order=['overview','title','market','company','bmc','vpc','jobs','pains','gains','products','painrelievers','gaincreators','fit','market-fit','segment','validate','roles','overview'];
+  const labels={overview:'전체 보기',title:'누구에게 어떤 가치를',market:'시장 배경',company:'리후 진단',bmc:'사업 구조 (BMC)',vpc:'가치제안 캔버스 (VPC)',jobs:'고객의 할 일',pains:'불만',gains:'혜택',products:'제품·서비스',painrelievers:'불만 해결',gaincreators:'혜택 창출',fit:'맞물림 검사',"market-fit":'시장 적합성 판정',segment:'타깃 세그먼트',validate:'검증',roles:'실행 구조'};
+  function rectOf(id){
+    if(id==='overview') return {x:0,y:0,w:SW,h:SH};
+    if(id==='vpc'){ const v=document.getElementById('vpc'); return {x:v.offsetLeft-60,y:v.offsetTop-80,w:v.offsetWidth+120,h:v.offsetHeight+160}; }
+    const el=document.querySelector(`[data-frame="${id}"]`);
+    // slides inside #vpc are positioned relative to it
+    let x=el.offsetLeft,y=el.offsetTop; const p=el.offsetParent; if(p&&p.id==='vpc'){x+=p.offsetLeft;y+=p.offsetTop;}
+    return {x,y,w:el.offsetWidth,h:el.offsetHeight};
+  }
+  let i=0;
+  const dots=document.getElementById('dots'); order.forEach(()=>{dots.appendChild(document.createElement('i'))});
+  function fit(id){
+    const f=rectOf(id); const vw=vp.clientWidth, vh=vp.clientHeight-hud.offsetHeight;
+    const pad=(id==='overview'||id==='vpc')?0.94:0.985;
+    const s=Math.min(vw/f.w, vh/f.h)*pad;
+    const tx=vw/2-(f.x+f.w/2)*s, ty=vh/2-(f.y+f.h/2)*s;
+    stage.style.transform=`translate(${tx}px,${ty}px) scale(${s})`;
+  }
+  function go(n,push=true){
+    i=(n+order.length)%order.length; const id=order[i]; fit(id);
+    document.getElementById('crumb').innerHTML=`<b>${i+1}/${order.length}</b> · ${labels[id]}`;
+    [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i));
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(e){} }
+  }
+  document.getElementById('prev').onclick=()=>go(i-1);
+  document.getElementById('next').onclick=()=>go(i+1);
+  document.getElementById('home').onclick=()=>go(0);
+  document.querySelectorAll('[data-frame]').forEach(el=>{
+    const jump=()=>{const k=order.indexOf(el.dataset.frame); if(k>=0) go(k);};
+    el.addEventListener('click',e=>{e.stopPropagation(); jump();});
+    el.addEventListener('keydown',e=>{ if(e.key==='Enter') jump(); });
+  });
+  document.getElementById('vpc').addEventListener('click',e=>{ if(e.target.closest('.slide')) return; e.stopPropagation(); go(order.indexOf('vpc')); });
+  vp.addEventListener('click',()=>go(0));
+  window.addEventListener('keydown',e=>{
+    if(document.body.classList.contains('reader')) return;
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1)}
+    else if(e.key==='Escape'||e.key==='Home'){go(0)}
+  });
+  window.addEventListener('resize',()=>fit(order[i]));
+  const easy=document.getElementById('easy');
+  easy.addEventListener('change',()=>document.body.classList.toggle('noeasy',!easy.checked));
+  const reader=document.getElementById('reader');
+  function buildReader(){
+    if(reader.childElementCount) return;
+    order.slice(1,-1).forEach(id=>{ const el=document.querySelector(`[data-frame="${id}"]`); if(el){ const c=el.cloneNode(true); c.removeAttribute('tabindex'); c.removeAttribute('data-frame'); c.style.removeProperty('--u'); reader.appendChild(c);} });
+  }
+  const rmode=document.getElementById('rmode');
+  function setReader(on){ document.body.classList.toggle('reader',on); if(on) buildReader(); else fit(order[i]); }
+  rmode.addEventListener('change',()=>setReader(rmode.checked));
+  if(window.innerWidth<700){ rmode.checked=true; setReader(true); }
+  const h=(location.hash||'').slice(1); const k=order.indexOf(h);
+  stage.style.transition='none'; go(k>0?k:0,false); requestAnimationFrame(()=>{stage.style.transition='';});
+  window.addEventListener('hashchange',()=>{const k=order.indexOf((location.hash||'').slice(1)); if(k>=0) go(k,false);});
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>fit(order[i]));
+})();
+</script>
+</html>
