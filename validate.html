@@ -105,6 +105,12 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:7px 9p
       <div class="grid" id="cells"></div>
       <div class="prog" id="prog"></div>
       <div class="small" id="progtxt"></div>
+      <div class="btns" id="sheetbar">
+        <label style="flex-direction:row;align-items:center;gap:6px">기록자 <input type="text" id="who" placeholder="효인" style="font:inherit;padding:7px 9px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:3px;width:90px"></label>
+        <button id="savesheet">시트에 저장</button>
+        <button class="ghost" id="loadsheet">시트에서 불러오기</button>
+        <span class="small" id="sheetmsg"></span>
+      </div>
       <div class="btns">
         <button id="copy">결과 복사</button>
         <button class="ghost" id="reset">입력 초기화</button>
@@ -234,6 +240,9 @@ const H=[
 ];
 const LAYERS=[['0층','전제','시장이 있나'],['1층','가치','무엇에 돈을 내나'],['2층','세그먼트','누구부터'],['3층','채널','어떻게 닿나'],['4층','운영','버틸 수 있나']];
 
+// ---------- Google Sheet backend (Apps Script 웹 앱 URL) ----------
+const SHEET_URL='';   // 배포 후 '웹 앱 URL'을 여기에 넣는다. 비어 있으면 저장 기능이 숨겨짐.
+
 // ---------- state ----------
 let S={};
 try{S=JSON.parse(localStorage.getItem('lihu-validate')||'{}')||{}}catch(e){S={}}
@@ -332,6 +341,29 @@ document.getElementById('reset').addEventListener('click',e=>{
   S={};save();renderInputs();renderResult();armed=false;e.target.textContent='입력 초기화';
 });
 
+// ---------- sheet sync ----------
+(function(){
+  const bar=document.getElementById('sheetbar'),msg=document.getElementById('sheetmsg');
+  if(!SHEET_URL){bar.querySelectorAll('button,label').forEach(e=>e.hidden=true);msg.textContent='시트 연결 전: 결과 복사로 공유하세요.';return}
+  try{document.getElementById('who').value=localStorage.getItem('lihu-who')||''}catch(e){}
+  document.getElementById('savesheet').addEventListener('click',async()=>{
+    const who=document.getElementById('who').value.trim()||'익명';try{localStorage.setItem('lihu-who',who)}catch(e){}
+    const c=conclude();const rows=H.map(h=>({ts:new Date().toISOString(),who,hid:h.id,title:h.title,
+      inputs:h.inputs.map(([k,l])=>`${l}=${S[h.id+'.'+k]??''}`).join(' | '),status:c.st[h.id]===null?'미입력':c.st[h.id]?'TRUE':'FALSE',pos:c.pos,raw:JSON.stringify(Object.fromEntries(h.inputs.map(([k])=>[k,S[h.id+'.'+k]??''])))}));
+    msg.textContent='저장 중…';
+    try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({rows})});msg.textContent=`저장됨 (${who}, ${new Date().toLocaleTimeString('ko-KR')})`}
+    catch(e){msg.textContent='저장 실패. 인터넷 연결을 확인하고 다시 눌러 주세요.'}
+  });
+  document.getElementById('loadsheet').addEventListener('click',async()=>{
+    msg.textContent='불러오는 중…';
+    try{const r=await fetch(SHEET_URL);const d=await r.json();
+      // 가설별 가장 최근 입력을 복원
+      const latest={};d.rows.forEach(x=>{if(!latest[x.hid]||x.ts>latest[x.hid].ts)latest[x.hid]=x});
+      Object.values(latest).forEach(x=>{let o={};try{o=JSON.parse(x.raw||'{}')}catch(e){}Object.entries(o).forEach(([k,v])=>{S[x.hid+'.'+k]=v})});
+      save();renderInputs();renderResult();msg.textContent=`불러옴: ${Object.keys(latest).length}개 가설, 마지막 기록 ${Object.values(latest).map(x=>x.who).filter((v,i,a)=>a.indexOf(v)===i).join('·')}`}
+    catch(e){msg.textContent='불러오기 실패. 시트 웹 앱이 "모든 사용자" 액세스로 배포됐는지 확인해 주세요.'}
+  });
+})();
 renderInputs();renderResult();route();
 </script>
 </html>
