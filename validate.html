@@ -114,6 +114,7 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:7px 9p
     <div class="verdict">
       <h2>현재 결론</h2>
       <p class="pos" id="pos"></p>
+      <p class="small" id="howto">완성 조건: 바깥 과제 14개는 각각 20명 응답 또는 근거 숫자, 안쪽 질문 14개는 대표 말로 한 줄씩. 다 채우면 아래 아홉 칸이 전부 "검증 전"에서 방향으로 바뀝니다.</p>
       <div class="grid" id="cells"></div>
       <div class="prog" id="prog"></div>
       <div class="small" id="progtxt"></div>
@@ -399,7 +400,7 @@ function renderInside(){
 function conclude(){
   const st={};H.forEach(h=>st[h.id]=status(h));const v0=vals(H[0]);const c={};
   if(st.H0===false){c.pos=v0.b>=v0.c?'턴키 선호 시장으로 판정됨. 리후는 하이엔드 스튜디오의 협력 시공사(C)로 간다.':'셀프 선호 시장으로 판정됨. 시공 대신 공정 순서 컨설팅·감리 상품으로 피벗한다.'}
-  else if(st.H0===null){c.pos='카테고리 1(H0)이 아직 비어 있다. 인터뷰 20명 분류부터 넣으면 방향이 잡힌다.'}
+  else if(st.H0===null){c.pos='아직 입력 전입니다. 과제마다 20명 정도의 응답(또는 근거 숫자)을 넣으면 판정이 나오고, H0부터 채우면 여기에 사업 방향이 한 문장으로 완성됩니다.'}
   else{
     let core='되돌릴 수 없는 공정(설비·방수·전기·바닥)의 책임 시공';
     if(st.H2===true)core='고객이 고른 하이엔드 디테일을 기초공정부터 책임지고 그대로 구현';
