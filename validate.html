@@ -26,7 +26,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px
 h1{font-family:var(--display);font-size:1.8rem;margin:0 0 4px;color:var(--navy);text-wrap:balance}
 .sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
 .whobar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-left:6px solid var(--stone);padding:12px 14px;margin-bottom:16px}
-.whobar .wl{font-weight:700;color:var(--stone);font-size:.8rem;letter-spacing:.06em}
+.whobar .wl{font-weight:700;color:var(--navy);font-size:1rem}
 .whobar button{background:transparent;color:var(--navy);border:1px solid var(--navy);border-radius:999px;padding:7px 16px}
 .whobar button.on{background:var(--navy);color:#fff}
 :root[data-theme="dark"] .whobar button.on{color:#111}
@@ -112,7 +112,7 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:7px 9p
   <h1>리후 대표 조사 과제</h1>
   <p class="sub">효인·기헌 대표에게. 아래는 "우리가 이렇게 가정하고 있는데, 이게 맞아?"를 직접 확인해 오는 과제입니다. 방법은 고객 인터뷰든 주변 대표든 유튜브 댓글이든 뭐든 좋고, <b>근거</b>와 <b>대표 의견</b>을 같이 적어 주세요. 숫자가 채워지면 결론 탭에 사업 방향이 자동으로 정리됩니다. 끝나면 결론 탭에서 <b>시트에 저장</b>을 눌러 주세요.</p>
 
-  <div class="whobar" id="whobar"><span class="wl">기록자</span><button type="button" data-who="백효인">백효인</button><button type="button" data-who="이기헌">이기헌</button><span class="small" id="whomsg">먼저 기록자를 고르면 아래가 열립니다. 두 대표가 각자 따로 적고, 결론 탭에서 서로 판정이 다른 과제를 보여줍니다.</span></div>
+  <div class="whobar" id="whobar"><span class="wl">당신은 누구십니까?</span><button type="button" data-who="이기헌">이기헌</button><button type="button" data-who="백효인">백효인</button><span class="small" id="whomsg">고르면 아래가 열립니다. 두 대표가 각자 따로 적고, 결론 탭에서 서로 판정이 다른 과제를 보여줍니다.</span></div>
 
   <div id="gate" hidden>
   <nav class="tabs" id="tabs">
@@ -341,7 +341,7 @@ const PG=[
 ];
 
 // ---------- state ----------
-const WHO=['백효인','이기헌'];
+const WHO=['이기헌','백효인'];
 let who=null,ALL={},S={};
 try{ALL=JSON.parse(localStorage.getItem('lihu-validate2')||'{}')||{}}catch(e){ALL={}}
 function save(){if(who)ALL[who]=S;try{localStorage.setItem('lihu-validate2',JSON.stringify(ALL))}catch(e){}}
@@ -351,7 +351,7 @@ function statusOf(h,X){try{return h.judge(valsOf(h,X))}catch(e){return null}}
 function status(h){return statusOf(h,S)}
 function selectWho(w){who=w;S=ALL[w]||(ALL[w]={});try{localStorage.setItem('lihu-who',w)}catch(e){}
   document.querySelectorAll('#whobar button').forEach(b=>b.classList.toggle('on',b.dataset.who===w));
-  document.getElementById('whomsg').textContent=`${w} 대표의 입력입니다. 다른 대표 입력은 버튼을 바꾸면 보입니다.`;
+  document.getElementById('whomsg').textContent=`${w} 대표로 기록 중입니다. 다른 대표의 입력은 버튼을 바꾸면 보입니다.`;
   document.getElementById('gate').hidden=false;renderInputs();renderInside();renderResult();route();}
 document.querySelectorAll('#whobar button').forEach(b=>b.addEventListener('click',()=>selectWho(b.dataset.who)));
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
