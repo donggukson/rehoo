@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap">
 <style>
-/* Layout: 안(세그먼트→VPC→BMC 연계) → 설문지(그룹별, 문항마다 P/G 태그) → 결과 입력(P/G별 숫자) → 판정(유지/수정/피벗). 백효인 전용. Brand palette Deep Navy / Warm Stone / Soft Beige. */
+/* 1 안(세그먼트·시장크기·VPC 그림·BMC 그림·운영모델) → 2 인터뷰·관찰(과거 경험만, 문항마다 측정법) → 3 결과 입력 → 4 판정(두 캔버스가 색으로 갱신). 백효인 대표용. */
 :root{
   --bg:#f6f2ec;--paper:#fffdf9;--fg:#1c2233;--muted:#6b6f7a;--line:#ddd5c8;
   --navy:#1f3864;--stone:#9c8b78;
@@ -22,7 +22,7 @@
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;margin:0}
-.wrap{max-width:960px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1000px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1{font-family:var(--display);font-size:1.8rem;margin:0 0 4px;color:var(--navy);text-wrap:balance}
 .sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
 .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
@@ -31,47 +31,74 @@ h1{font-family:var(--display);font-size:1.8rem;margin:0 0 4px;color:var(--navy);
 .tabs a.homelink{border-color:var(--stone);color:var(--stone);font-weight:700}
 :root[data-theme="dark"] .tabs a.on{color:#111}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs a.on{color:#111}}
-h2{font-family:var(--display);font-size:1.2rem;color:var(--navy);margin:26px 0 8px}
-h3{font-size:1rem;margin:16px 0 6px}
+h2{font-family:var(--display);font-size:1.2rem;color:var(--navy);margin:28px 0 8px}
+h2 .ver{font-family:var(--body);font-size:.75rem;font-weight:700;color:var(--stone);margin-left:8px;letter-spacing:.04em}
 .note{font-size:.92rem;background:var(--paper);border:1px solid var(--line);padding:12px 14px;margin:10px 0}
 .small{font-size:.85rem;color:var(--muted)}
 button{font:inherit;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:8px 14px;border-radius:4px;cursor:pointer;font-weight:500}
 button.ghost{background:transparent;color:var(--navy)}
 button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--stone);outline-offset:2px}
 .btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
-
+table{border-collapse:collapse;width:100%;font-size:.88rem;background:var(--paper)}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--bg);font-weight:700;color:var(--navy)}
+.tw{overflow-x:auto}
+.why{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:start}
+@media (max-width:760px){.why{grid-template-columns:1fr}}
+.why p{margin:0 0 10px}
+.why .pics{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.why .pics img{width:100%;height:150px;object-fit:cover;border:1px solid var(--line);border-radius:3px}
+.why .pics img.wide{grid-column:1/3;height:200px}
+.why .cap{font-size:.78rem;color:var(--muted);margin-top:4px}
+.why .lesson{background:var(--paper);border-left:4px solid var(--stone);padding:10px 14px;margin-top:10px;font-size:.95rem}
 .seg{background:var(--paper);border:1px solid var(--line);border-left:6px solid var(--navy);padding:14px 18px}
 .seg b{color:var(--navy)}
-.vpc{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
-@media (max-width:720px){.vpc{grid-template-columns:1fr}}
-.panel{background:var(--paper);border:1px solid var(--line);padding:14px 16px;min-width:0}
-.panel h3{margin:0 0 4px;font-family:var(--display);color:var(--navy)}
-.panel .cap{font-size:.8rem;color:var(--muted);margin-bottom:8px}
-.item{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:7px 0;border-top:1px dashed var(--line);font-size:.93rem;align-items:start}
-.item:first-of-type{border-top:0}
-.id{font-weight:700;font-size:.78rem;padding:1px 7px;border-radius:999px;white-space:nowrap;margin-top:3px}
-.id.P{background:var(--no-bg);color:var(--pain)} .id.G{background:var(--ok-bg);color:var(--gain)} .id.J{background:var(--job-bg);color:var(--job)}
-.item .link{display:block;font-size:.8rem;color:var(--muted)}
-.item .st{font-size:.75rem;font-weight:700;margin-left:6px}
-.st.ok{color:var(--ok)} .st.no{color:var(--no)} .st.mid{color:var(--mid)}
-.bmc{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:auto auto auto;gap:6px;margin-top:12px}
-.bmc .c{background:var(--paper);border:1px solid var(--line);padding:8px 10px;font-size:.85rem;min-width:0}
-.bmc .c b{display:block;font-size:.72rem;letter-spacing:.06em;color:var(--stone);margin-bottom:3px}
-.bmc .c ul{margin:0;padding-left:1.1em}.bmc .c li{margin:1px 0}
-.kp{grid-column:1;grid-row:1/3}.ka{grid-column:2;grid-row:1}.kr{grid-column:2;grid-row:2}.vp{grid-column:3;grid-row:1/3;border-color:var(--navy)!important}.cr{grid-column:4;grid-row:1}.ch{grid-column:4;grid-row:2}.cs{grid-column:5;grid-row:1/3;border-color:var(--navy)!important}.cost{grid-column:1/3;grid-row:3}.rev{grid-column:3/6;grid-row:3}
-@media (max-width:720px){.bmc{grid-template-columns:1fr 1fr}.bmc .c{grid-column:auto!important;grid-row:auto!important}}
 .flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin:10px 0}
 .flow span{background:var(--paper);border:1px solid var(--line);padding:3px 10px;border-radius:999px}
 
+/* ---- VPC 그림 ---- */
+.vpcfig{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:12px}
+@media (max-width:760px){.vpcfig{grid-template-columns:1fr}.vpcfig .arrow{transform:rotate(90deg);justify-self:center}}
+.square{background:var(--paper);border:3px solid var(--navy);border-radius:6px;padding:12px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:8px;min-width:0}
+.square .prods{grid-column:1;grid-row:1/3;border-right:1px dashed var(--line);padding-right:8px}
+.circle{background:var(--paper);border:3px solid var(--navy);border-radius:50%;aspect-ratio:1;padding:14% 10%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:6px;min-width:0;max-width:100%}
+.circle .jobs{grid-column:1/3;grid-row:2;border-top:1px dashed var(--line);padding-top:6px}
+.circle .pains{grid-column:1;grid-row:1;border-right:1px dashed var(--line);padding-right:6px}
+.circle .gains{grid-column:2;grid-row:1;padding-left:6px}
+.zone h4{margin:0 0 4px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--stone)}
+.zone h4.P{color:var(--pain)}.zone h4.G{color:var(--gain)}.zone h4.J{color:var(--job)}
+.chip{display:block;font-size:.76rem;line-height:1.3;padding:3px 6px;margin:3px 0;border-radius:3px;background:var(--bg);border-left:3px solid var(--wait)}
+.chip.P{border-left-color:var(--pain)}.chip.G{border-left-color:var(--gain)}.chip.J{border-left-color:var(--job)}
+.chip.ok{background:var(--ok-bg)}.chip.no{background:var(--no-bg);text-decoration:line-through;opacity:.8}.chip.mid{background:var(--mid-bg)}
+.chip b{font-weight:700;margin-right:3px}
+.arrow{font-size:1.6rem;color:var(--navy);text-align:center}
+.legend{font-size:.78rem;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 8px;vertical-align:middle}
+
+/* ---- BMC 그림 ---- */
+.bmc{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:auto auto auto;gap:6px;margin-top:12px}
+.bmc .c{background:var(--paper);border:1px solid var(--line);padding:8px 10px;font-size:.84rem;min-width:0}
+.bmc .c b{display:block;font-size:.72rem;letter-spacing:.06em;color:var(--stone);margin-bottom:3px}
+.bmc .c ul{margin:0;padding-left:1.1em}.bmc .c li{margin:1px 0}
+.bmc .c li.ok{color:var(--ok)}.bmc .c li.no{color:var(--no);text-decoration:line-through}.bmc .c li.mid{color:var(--mid)}
+.kp{grid-column:1;grid-row:1/3}.ka{grid-column:2;grid-row:1}.kr{grid-column:2;grid-row:2}.vp{grid-column:3;grid-row:1/3;border:2px solid var(--navy)!important}.cr{grid-column:4;grid-row:1}.ch{grid-column:4;grid-row:2}.cs{grid-column:5;grid-row:1/3;border:2px solid var(--navy)!important}.cost{grid-column:1/3;grid-row:3}.rev{grid-column:3/6;grid-row:3}
+@media (max-width:720px){.bmc{grid-template-columns:1fr 1fr}.bmc .c{grid-column:auto!important;grid-row:auto!important}}
+
+/* ---- 인터뷰 ---- */
 .grp{background:var(--paper);border:1px solid var(--line);border-top:3px solid var(--stone);padding:14px 18px;margin:12px 0}
-.grp h3{margin:0 0 2px;font-family:var(--display);color:var(--navy)}
-.grp h4{font-size:.85rem;color:var(--muted);margin:12px 0 2px;letter-spacing:.04em}
+.grp h3{margin:0 0 2px;font-family:var(--display);color:var(--navy);font-size:1.05rem}
+.grp h4{font-size:.85rem;color:var(--muted);margin:14px 0 2px;letter-spacing:.04em}
 .grp .who{font-size:.85rem;color:var(--muted);margin-bottom:8px}
-.grp ol{padding-left:1.3em;margin:6px 0}.grp li{margin:7px 0}
+.grp ol{padding-left:1.4em;margin:6px 0}.grp li{margin:9px 0}
+.m{display:block;font-size:.78rem;color:var(--muted);margin-top:2px;padding-left:2px;border-left:2px solid var(--line);padding-left:8px}
+.m b{color:var(--stone);font-weight:700}
 .tag{font-size:.72rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;white-space:nowrap}
 .tag.P{background:var(--no-bg);color:var(--pain)}.tag.G{background:var(--ok-bg);color:var(--gain)}.tag.J{background:var(--job-bg);color:var(--job)}.tag.X{background:var(--wait-bg);color:var(--wait)}
-.card{display:inline-block;border:1px solid var(--line);border-radius:4px;padding:4px 8px;margin:2px;font-size:.85rem;background:var(--bg)}
+.card{display:inline-block;border:1px solid var(--line);border-radius:4px;padding:4px 8px;margin:2px;font-size:.84rem;background:var(--bg)}
+.obs{background:var(--bg);border:1px dashed var(--stone);padding:10px 12px;margin-top:8px;font-size:.88rem}
+.obs b{color:var(--stone)}
 
+/* ---- 입력 ---- */
 .row{background:var(--paper);border:1px solid var(--line);padding:12px 16px;margin-bottom:8px;border-left:4px solid var(--wait)}
 .row.ok{border-left-color:var(--ok)}.row.no{border-left-color:var(--no)}.row.mid{border-left-color:var(--mid)}
 .row header{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
@@ -84,139 +111,236 @@ input[type=number]{font:inherit;font-variant-numeric:tabular-nums;padding:6px 9p
 textarea{width:100%;font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:8px 10px;border-radius:3px;resize:vertical;min-height:52px}
 .rule{font-size:.82rem;color:var(--muted)}
 
+/* ---- 판정 ---- */
 .verdict{background:var(--paper);border:1px solid var(--line);border-left:6px solid var(--navy);padding:18px 20px;margin-bottom:18px}
 .verdict .pos{font-size:1.1rem;font-weight:700;margin:6px 0 10px;text-wrap:balance}
 .prod{border:1px solid var(--line);padding:10px 12px;margin:8px 0;border-left:4px solid var(--wait)}
 .prod.ok{border-left-color:var(--ok)}.prod.no{border-left-color:var(--no)}.prod.mid{border-left-color:var(--mid)}
-.prod b{display:block}
-.prod .m{font-size:.85rem;color:var(--muted)}
+.prod b{display:block}.prod .d{font-size:.85rem;color:var(--muted)}
 .pivot{margin-top:12px;padding:10px 12px;background:var(--mid-bg);border-left:3px solid var(--mid);font-size:.9rem}
 .pivot:empty{display:none}
+.mk{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:8px}
+.mk .k{background:var(--paper);border:1px solid var(--line);padding:10px 12px}
+.mk .k b{display:block;font-size:.72rem;letter-spacing:.06em;color:var(--stone)}
+.mk .k .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
 </style>
 
 <div class="wrap">
   <h1>리후 가치제안 검증</h1>
-  <p class="sub">효인 대표용. <b>1 · 안</b>에 우리가 미리 정의한 고객의 일(J)·고통(P)·기대(G)와 상품이 있습니다. 이게 진짜인지, 사람들이 이 혜택을 원하는지를 <b>2 · 설문지</b>로 만나서 확인하고, <b>3 · 결과 입력</b>에 숫자를 넣으면 <b>4 · 판정</b>에서 상품별 유지 / 수정 / 피벗이 나옵니다. 아는 업계 사람을 최대한 쓰세요.</p>
+  <p class="sub">대상 기업 리후디자인(대표 백효인). 이 페이지는 <b>1 · 안</b>(지금 가정하고 있는 고객·시장·가치제안·사업모델)을 그림으로 보여주고, <b>2 · 인터뷰·관찰</b>로 사람들이 실제로 겪은 불편과 행동을 확인한 뒤, <b>3 · 결과 입력</b>의 숫자로 <b>4 · 판정</b>에서 두 캔버스가 어떻게 바뀌는지 보여줍니다. 의견("있으면 좋겠다")은 묻지 않고, 과거·현재 경험만 묻습니다. 말로 안 나오면 관찰합니다.</p>
 
   <nav class="tabs" id="tabs">
-    <a href="./" class="homelink" title="가치체인 과제로">⌂ 홈</a><a href="#plan">1 · 안</a><a href="#sheet">2 · 설문지</a><a href="#inputs">3 · 결과 입력</a><a href="#result">4 · 판정</a>
+    <a href="./" class="homelink" title="가치체인 과제로">⌂ 홈</a><a href="#why">0 · 왜 이 과제인가</a><a href="#plan">1 · 안</a><a href="#sheet">2 · 인터뷰·관찰</a><a href="#inputs">3 · 결과 입력</a><a href="#result">4 · 판정</a>
   </nav>
 
-  <section id="v-plan">
-    <div class="flow"><span>누구에게</span>→<span>그 사람의 일·고통·기대 (VPC 오른쪽)</span>→<span>우리가 주는 것 (VPC 왼쪽)</span>→<span>그걸 돌리는 회사 구조 (BMC)</span>→<span>설문으로 확인</span></div>
-
-    <h2>누구에게 — 고객 세그먼트 (가안)</h2>
-    <div class="seg">
-      <b>1순위</b> 경기 남부(동탄·영통·수지) 10년 이상 구축 아파트에 살거나 들어갈 사람 중, <b>하자와 추가비용이 제일 무서운 사람</b>. 부부가 같이 결정하고 정보는 맘카페·유튜브·지인에게서 얻음. 마감은 어느 정도 스스로 고르되 설비·방수·전기 같은 되돌릴 수 없는 공정은 믿을 사람에게 맡기고 싶어 함.<br>
-      <b>2순위(B2B)</b> 디자인은 하지만 시공 하자로 고생하는 하이엔드 디자인 스튜디오.<br>
-      <span class="small">둘 다 가정. 설문 결과로 바뀔 수 있음.</span>
-    </div>
-
-    <h2>가치제안 캔버스 (가안)</h2>
-    <div class="vpc">
-      <div class="panel">
-        <h3>고객 프로파일 — 그 사람이 겪는 것</h3>
-        <div class="cap">일(J) · 고통(P) · 기대(G). 설문은 이 항목이 진짜인지 확인하는 것.</div>
-        <div id="profile"></div>
+  <!-- ===================== 0. 왜 ===================== -->
+  <section id="v-why">
+    <h2 style="margin-top:4px">왜 이 과제를 하는가</h2>
+    <div class="why">
+      <div>
+        <p><b>전에 살던 집.</b> 광교의 30층 탑층 복층 아파트였고, 대기업 브랜드 리모델링으로 겉보기엔 예쁘게 해 둔 집이었다. 살아 보니 달랐다. 샤시를 손대지 않아 겨울에 찬바람이 들어왔고, 복층이라 난방비가 많이 나왔다. 사진으로는 좋아 보였지만 <b>생활에서 실제로 불편한 것</b>은 사진에 안 찍히는 곳에 있었다.</p>
+        <p><b>이번 집.</b> 수원으로 이사하면서 "돈을 더 들이더라도 제대로 하자"고 마음먹고 알아보다가, 유튜브로 알려진 '인테리어쇼' 카페의 아카데미가 <b>졸업작품 현장</b>을 모집하는 것을 봤다. 지원했고, 거기서 리후디자인의 백효인 대표를 만났다. 그는 내 집을 자기 작품으로 여겨 시간과 비용을 많이 들여 시공했고, 나는 그 과정에서 공정과 자재를 같이 공부했다. 그렇게 친해졌다.</p>
+        <p><b>보게 된 것.</b> 설비·방수 같은 기초공정부터 디테일 마감까지 손은 아주 좋은데, 회사로서는 다른 그림이었다. 고객 응대, 견적과 기록, 홍보, 시장에서 회사가 서는 방식 같은 <b>프로세스가 시공 실력을 못 따라온다</b>. 그래서 종종 도움을 청했고, 몇 번 도와주기도 했다.</p>
+        <p><b>그래서 이 과제.</b> 직장 특성상 회사 업무는 과제로 쓸 수 없다. 대신 실제로 존재하는 회사, 실제 시공력, 실제로 만날 수 있는 고객과 업계 사람이 있는 이 사례를 가지고, <b>"이 사람이 인테리어 시장에서 앞으로 어떻게 살아남을 것인가"</b>를 수업의 틀(세그먼트 → 가치제안 캔버스 → 비즈니스모델 캔버스 → 고객검증 → 피벗)로 같이 고민해 보기로 했다. 사업 주체는 리후디자인이고, 나는 BM 설계와 고객검증을 수행하는 역할이다. 인터뷰는 대표가 직접 한다.</p>
+        <div class="lesson"><b>이 경험이 가설이 된 지점</b> — "예쁘게"가 아니라 <b>되돌릴 수 없는 공정(샤시·설비·방수·단열)을 제대로 하는 것</b>이 사는 사람에게 더 큰 가치라는 것, 그리고 그걸 잘하는 사람이 있어도 고객이 그를 찾아내고 믿을 방법이 없다는 것. 이 둘이 이 과제의 출발 가설이다.</div>
       </div>
-      <div class="panel">
-        <h3>가치맵 — 우리가 주는 것</h3>
-        <div class="cap">상품 3개와, 각 상품이 어느 고통을 줄이고 어느 기대를 만드는지.</div>
-        <div id="valuemap"></div>
+      <div>
+        <div class="pics">
+          <img class="wide" src="img/vanity.jpg" alt="수원 집 욕실 세면대 디테일">
+          <img src="img/bench.jpg" alt="수원 집 현관 벤치">
+          <img src="img/entry.jpg" alt="수원 집 현관">
+        </div>
+        <div class="cap">수원 집 시공 결과(리후디자인, 인테리어쇼 아카데미 졸업작품 현장). 사진은 결과이고, 가설은 사진에 안 찍히는 공정에서 나왔다.</div>
       </div>
     </div>
-
-    <h2>비즈니스모델 캔버스 (가안) — VPC와 연결</h2>
-    <div class="small">가치제안(VP)과 고객 세그먼트(CS)는 위 VPC에서 그대로 옴. 나머지 7칸은 그 둘을 돌리기 위한 구조.</div>
-    <div class="bmc">
-      <div class="c kp"><b>핵심 파트너</b><ul><li>전속 시공팀(목공·타일·전기)</li><li>하이엔드 디자인 스튜디오 2~3곳 (상품 ③의 고객이자 파트너)</li><li>자재상(세라믹·석재·주방)</li><li>이기헌: 운영·홍보·헤드쿼터</li><li>손동국: 견적·리포트·기록 시스템</li></ul></div>
-      <div class="c ka"><b>핵심 활동</b><ul><li>되돌릴 수 없는 공정 직접 시공</li><li>공정 사진·주간 리포트 기록</li><li>6/12개월 점검</li><li>첫 상담·사후 연락 기록</li></ul></div>
-      <div class="c kr"><b>핵심 자원</b><ul><li>효인 시공력(설비·방수·기초공정 + 디테일 구현)</li><li>단가DB</li><li>디테일·공정 사진 포트폴리오</li><li>업계 인맥</li></ul></div>
-      <div class="c vp"><b>가치제안 ← VPC 왼쪽</b><ul><li>① 기초공정 책임 패키지 — 되돌릴 수 없는 공정을 대표가 직접, 보증·점검 포함, 공개 단가</li><li>② 디테일 구현 패키지 — 고른 사진 그대로, 확정가, 과정 사진</li><li>③ 스튜디오 협력 시공 — 디자인 회사의 기초공정·공정관리를 책임</li></ul></div>
-      <div class="c cr"><b>고객 관계</b><ul><li>대표 얼굴이 있는 책임</li><li>주간 리포트</li><li>끝나고 점검 방문 → 후기·소개</li></ul></div>
-      <div class="c ch"><b>채널</b><ul><li>기존 고객 소개</li><li>맘카페 후기</li><li>유튜브(기헌): 공정 교육</li><li>스튜디오 소개(③)</li></ul></div>
-      <div class="c cs"><b>고객 세그먼트 ← VPC 오른쪽</b><ul><li>1순위: 경기 남부 10년+ 구축, 하자·추가비용이 무서운 부부</li><li>2순위: 시공 하자로 고생하는 디자인 스튜디오</li><li>배제: 최저가만 찾는 고객, 디자인 제안을 원하는 고객</li></ul></div>
-      <div class="c cost"><b>비용 구조</b><ul><li>인건비(대표·시공팀), 자재</li><li>보증·점검 충당금(매출의 일정 %)</li><li>기록·시스템 운영은 거의 0 (동국)</li></ul></div>
-      <div class="c rev"><b>수익 구조</b><ul><li>①② 패키지 시공비 = 원가 × (1+가산율), 단가 공개</li><li>③ 스튜디오 협력 시공비(안정 매출)</li><li>점검·AS는 보증 내 무상, 이후 유상</li></ul></div>
-    </div>
-    <div class="note"><b>연결 규칙</b> — 설문에서 P·G가 확인되면 VP의 해당 상품이 유지되고, 확인이 안 되면 그 상품을 수정하거나 뺀다. CS가 틀리면(그 사람들이 이 고통을 안 느끼면) 세그먼트를 바꾼다. BMC 나머지 칸은 VP·CS가 확정된 뒤 따라서 고친다.</div>
   </section>
 
+  <!-- ===================== 1. 안 ===================== -->
+  <section id="v-plan" hidden>
+    <div class="flow"><span>시장은 고객의 합</span>→<span>누구에게 (세그먼트)</span>→<span>그 사람의 일·불편·요구 (VPC 오른쪽)</span>→<span>우리가 주는 것 (VPC 왼쪽)</span>→<span>그걸 돌리는 구조 (BMC)</span>→<span>인터뷰·관찰로 확인</span></div>
+
+    <h2>시장을 나누는 축과 우리가 고른 자리 <span class="ver">가안 v0 · 2026-11-09</span></h2>
+    <div class="tw"><table>
+      <tr><th style="width:18%">축</th><th>시장 안의 구분</th><th style="width:34%">우리가 고른 자리 (가정)</th></tr>
+      <tr><td>가격대</td><td>초저가(도배·장판만) · 가성비 · <b>제대로</b> · 하이엔드 · 초하이엔드(디자이너 이름값, 별개 시장)</td><td>"제대로" 구간. 초저가와 초하이엔드는 제외</td></tr>
+      <tr><td>범위</td><td>전체 리모델링 · <b>부분(욕실·주방)</b> · 기초공정만</td><td>부분 또는 기초공정에서 시작, 전체로 확장</td></tr>
+      <tr><td>방식</td><td>셀프 · 반셀프 · <b>맡기되 알아보고 맡김</b> · 통째로 위임 · 디자인 의뢰</td><td>알아보고 맡기는 사람. 디자인 제안을 원하는 사람은 제외</td></tr>
+      <tr><td>공정·자재 특화</td><td>욕실·방수 · 타일 · 우드 · 무몰딩·무문선 디테일 · 세라믹 대판 · 주방</td><td><b>욕실·방수(되돌릴 수 없는 공정) + 무몰딩 디테일 구현</b></td></tr>
+      <tr><td>상황</td><td>입주 전 · <b>거주 중</b> · 매도 전 단장</td><td>입주 전과 거주 중 둘 다</td></tr>
+      <tr><td>고객 특성</td><td>맞벌이·바쁜 부부 · 과거 공사에서 데인 사람 · <b>반도체 성과급으로 목돈이 생긴 사람</b></td><td>경기 남부 반도체 종사자 부부를 1순위 가정. 특화인지 축소인지는 인터뷰로 판정(X4)</td></tr>
+    </table></div>
+
+    <h2>누구에게 — 고객 세그먼트 <span class="ver">가안 v0</span></h2>
+    <div class="seg">
+      <b>1순위</b> 경기 남부(동탄·영통·수지) 10년 이상 구축 아파트에 살거나 들어갈 <b>반도체 종사자 부부</b>로, 성과급 등 목돈이 생겼고, <b>과거 공사나 주변 사례에서 하자·추가비용을 겪어 "제대로" 하려는 사람</b>. 부부가 같이 결정하고 정보는 맘카페·유튜브·지인. 마감은 어느 정도 스스로 고르되 설비·방수·전기는 믿을 사람에게 맡기고 싶어 함.<br>
+      <b>2순위(B2B)</b> 디자인은 하지만 시공 하자로 고생하는 하이엔드 디자인 스튜디오.<br>
+      <b>제외</b> 최저가만 찾는 고객, 디자인 제안을 원하는 고객, 초하이엔드.<br>
+      <span class="small">반도체 특화가 "시장을 줄이는 것"인지 "이길 수 있는 시장을 고르는 것"인지는 하나로 판정: 반도체 종사자의 불편이 일반 고객과 다르면 특화(상품·메시지·채널을 바꿈), 같으면 세그먼트를 "경기 남부 10년+ 구축 거주자"로 넓히고 반도체는 채널로만 둠.</span>
+    </div>
+
+    <h2>시장 크기 — 전체 · 유효 · 수익 <span class="ver">아래에서 위로 쌓음</span></h2>
+    <div class="note">시장은 고객의 합이므로 위에서 비율로 자르지 않고, 세그먼트 고객 수 × 연간 공사 비율 × 객단가로 쌓습니다. 숫자는 '3 · 결과 입력'의 시장 칸에 넣으면 계산됩니다.</div>
+    <div class="tw"><table>
+      <tr><th style="width:16%">구분</th><th>정의</th><th style="width:38%">구하는 법 (효인·기헌이 할 일)</th></tr>
+      <tr><td><b>전체 시장 TAM</b></td><td>국내 주거 리모델링 시장</td><td>한국건설산업연구원 전망: 2025년 약 37조, 2030년 44조. 그대로 인용</td></tr>
+      <tr><td><b>유효 시장 SAM</b></td><td>경기 남부 10년 이상 구축 아파트 세대 중 연간 공사하는 세대 × "제대로" 구간 객단가</td><td>① 동탄1·2, 영통, 수지, 광교의 2016년 이전 준공 단지 세대수 합(공동주택관리정보시스템 K-apt, 네이버 부동산 단지 정보) ② 연간 공사 비율은 인터뷰 A에서 "최근 5년 내 공사했다" 비율로 추정 ③ 객단가는 단가DB의 부분·기초공정 평균</td></tr>
+      <tr><td><b>수익 시장 SOM</b></td><td>리후가 대표 직접 시공으로 실제 소화 가능한 매출</td><td>월 현장 수 × 12 × 객단가. 현실은 월 2현장. SOM / SAM이 1%를 넘지 않으면 "시장이 작아서" 못 하는 건 아니라는 뜻</td></tr>
+    </table></div>
+    <div class="mk" id="mk"></div>
+
+    <h2>가치제안 캔버스 <span class="ver">가안 v0 — 판정 탭에서 색으로 갱신됨</span></h2>
+    <div class="small">오른쪽 원이 고객(일 J · 불편 P · 요구 G), 왼쪽 네모가 우리(상품 S · 불편을 줄이는 것 · 요구를 채우는 것). 불편 7개는 고객 여정 순서(업체 선택 → 견적 → 결정 → 공사 중 → 결과 → 사후)에 셀프 경로 하나를 더해 겹치지 않게 나눴습니다.</div>
+    <div class="vpcfig" id="vpc0"></div>
+    <div class="legend">상품 뒤 괄호 = 그 상품이 줄이는 불편과 채우는 요구. 판정 후: <i style="background:var(--ok-bg);border:1px solid var(--ok)"></i>확인됨 <i style="background:var(--mid-bg);border:1px solid var(--mid)"></i>절반 <i style="background:var(--no-bg);border:1px solid var(--no)"></i>아님(취소선)</div>
+
+    <h2>비즈니스모델 캔버스 <span class="ver">가안 v0 — 판정 탭에서 갱신됨</span></h2>
+    <div class="small">가치제안(VP)과 고객 세그먼트(CS)는 위 VPC에서 그대로 옴. 나머지 7칸은 그 둘을 돌리기 위한 구조. 표준 프로세스는 "있어야 하는 것"(핵심 활동)이지 차별점이 아니며, 베끼기 어려운 것 세 가지만 핵심 자원에 둡니다.</div>
+    <div class="bmc" id="bmc0"></div>
+
+    <h2>운영 모델 — 공정 단계별로 누가 하나 <span class="ver">빈칸이 곧 과제</span></h2>
+    <div class="small">효인 대표 혼자 다 할 수 없음을 전제로, 단계마다 담당을 적었습니다. "도구"는 시중 프로그램이나 외주로 리후가 스스로 조달해야 하는 것입니다.</div>
+    <div class="tw"><table>
+      <tr><th>단계</th><th>하는 일</th><th>담당 (가정)</th><th>기록으로 남는 것</th></tr>
+      <tr><td>1 상담</td><td>첫 통화·방문, 어디서 보고 왔는지와 과거 공사 경험 묻기</td><td>이기헌</td><td>상담 기록(이 페이지 E 문항)</td></tr>
+      <tr><td>2 실측·견적</td><td>실측, 공정별 단가로 견적, 보증·점검 조건 명시</td><td>백효인 실측 / 견적 도구(단가DB)</td><td>공정별 견적서</td></tr>
+      <tr><td>3 디테일 확정</td><td>고객이 가져온 사진을 표준 디테일로 번역, 확정가</td><td>백효인 / 디자인 표준은 인쇼 디테일을 그대로 씀(새로 만들지 않음)</td><td>디테일 시트</td></tr>
+      <tr><td>4 계약·일정</td><td>표준계약서, 공정표</td><td>이기헌</td><td>계약서·공정표</td></tr>
+      <tr><td>5 기초공정</td><td>철거·설비·방수·전기·바닥</td><td><b>백효인 직접</b></td><td>공정 사진</td></tr>
+      <tr><td>6 마감</td><td>목공·타일·도장·가구</td><td>전속 시공팀(외주) / 디테일은 백효인 확인</td><td>공정 사진</td></tr>
+      <tr><td>7 주간 보고</td><td>사진·진행률 전달</td><td>이기헌 / 보고 도구</td><td>주간 리포트</td></tr>
+      <tr><td>8 준공·점검</td><td>준공 확인, 6/12개월 점검, 후기·소개 요청</td><td>백효인 점검 / 이기헌 후기</td><td>점검 기록·후기</td></tr>
+      <tr><td>9 회계·세무</td><td>정산, 세금</td><td>외주 세무사</td><td>장부</td></tr>
+      <tr><td>10 홍보·포트폴리오</td><td>디테일 사진 정리, 맘카페·유튜브</td><td>이기헌</td><td>포트폴리오</td></tr>
+    </table></div>
+    <div class="note"><b>베끼기 문제</b> — 위 프로세스는 다른 업체도 금방 따라 할 수 있습니다. 그래서 차별점은 프로세스가 아니라 ① 효인 대표의 손(되돌릴 수 없는 공정 + 디테일 구현), ② 현장마다 쌓이는 기록(사진·단가·고객의 말 — 시간이 있어야 생김), ③ 전속 시공팀·스튜디오와의 관계에 둡니다. 프로세스는 이 셋을 고객이 볼 수 있게 하는 그릇입니다. 중간 시장에 프로세스를 갖춘 업체가 얼마나 드문지는 인터뷰 B·C의 관찰(X7)로 확인합니다.</div>
+  </section>
+
+  <!-- ===================== 2. 인터뷰·관찰 ===================== -->
   <section id="v-sheet" hidden>
-    <div class="note">세 그룹을 만난다. <b>A 고객</b>(기존 고객·지인·지인의 지인 10명), <b>B 동료 시공자</b>(5명), <b>C 디자인 스튜디오 대표</b>(3~5곳). 문항 옆 태그가 "이 질문이 어느 고통·기대를 확인하는지"다. 답은 그날 '결과 입력'에 숫자로 옮긴다. 의향("~하시겠어요?")은 맨 끝에만 묻고, 과거에 실제로 겪은 것부터 묻는다.</div>
+    <div class="note"><b>원칙</b> ① 과거·현재에 실제로 한 일과 겪은 일만 묻는다. "이런 게 있으면 쓰겠나"는 묻지 않는다. ② 숫자로 답하게 한다(몇 번, 얼마, 며칠, 몇 곳). ③ 말로 안 나오는 것은 보여 달라고 하거나 현장에서 관찰한다. ④ 각 문항 아래 작은 글씨가 "이 답을 어떻게 숫자로 볼 것인가"다. 그날 바로 '3 · 결과 입력'에 옮긴다.<br>
+    세 그룹: <b>A 고객 10명</b>(기존 고객·지인·지인의 지인, 반도체 종사자 5 + 기타 5, 가능하면 부부 같이), <b>B 동료 시공자 5명</b>, <b>C 디자인 스튜디오 대표 3~5곳</b>.</div>
 
     <div class="grp">
-      <h3>A. 고객 — 10명</h3>
-      <div class="who">최근 2년 내 공사했거나 6개월 내 계획. 가능하면 부부 같이. 기존 고객 포함.</div>
-      <h4>A-1 배경·과거 행동</h4>
+      <h3>A. 고객 — 10명 (반도체 5 · 기타 5)</h3>
+      <div class="who">최근 2년 내 공사했거나 지금 진행 중. 직장군은 응답지 뒷면에 적고 집계 때만 붙인다.</div>
+      <h4>A-1 배경 (세그먼트·시장 크기용)</h4>
       <ol>
-        <li>사는 집은 어디, 몇 년차? 공사는 언제, 어디까지 했나(또는 할 계획)? 부부 중 누가 업체를 찾고 누가 결정했나? <span class="tag X">세그먼트</span></li>
-        <li>지난 공사에서 업체에 맡긴 공정과 직접 고르거나 한 공정을 나눠 말해 달라. <span class="tag J">J1·J3</span></li>
-        <li>공사 중·후에 하자, 추가비용, 재시공이 있었나? 얼마였나? 그때 업체는 어떻게 대응했나? <span class="tag P">P1·P2</span></li>
-        <li>업체를 고를 때 뭐가 제일 어려웠나? 몇 곳을 봤고 결국 뭘 보고 골랐나? <span class="tag P">P3</span></li>
-        <li>공사 중에 진행 상황을 어떻게 알았나? 몰라서 불안했던 적은? <span class="tag P">P4</span></li>
-        <li>레퍼런스 사진을 들고 갔나? 그대로 나왔나, "안 된다"거나 다르게 나온 적은? <span class="tag P">P5</span></li>
-        <li>(직접 한 공정이 있다면) 하다가 다시 하거나 돈을 더 쓴 게 있었나? 어느 공정에서? <span class="tag P">P6</span></li>
-        <li>상담 때 이해 안 되는 말, 혼자 정해야 해서 피곤했던 결정이 있었나? <span class="tag P">P7</span></li>
+        <li>사는 단지와 입주 연차는? 최근 5년 안에 집에 공사를 한 적이 있나? 있다면 언제, 어디까지(도배·장판 / 욕실·주방 / 전체)? <span class="tag X">세그먼트 · SAM</span>
+          <span class="m"><b>측정</b> 10명 중 "5년 내 공사함" 수 → 연간 공사 비율 추정(SAM). 공사 범위별 인원 수.</span></li>
+        <li>성과급이나 목돈이 들어왔을 때 실제로 어디에 썼나? 집에 쓴 게 있다면 무엇에 얼마? 집에 안 썼다면 그 돈은 어디로 갔나? <span class="tag X">X2 세그먼트</span>
+          <span class="m"><b>측정</b> 목돈 받은 사람 수, 그중 집(공사·가구 포함)에 쓴 사람 수, 금액. 집에 안 쓴 이유를 그대로 적는다(저축·대출·차·여행).</span></li>
+        <li>업체는 누가 찾고 최종 결정은 누가 했나? 정보는 어디서 얻었나(맘카페 / 블로그 / 유튜브 / 지인)? <span class="tag X">채널 · 결정자</span>
+          <span class="m"><b>측정</b> 배우자 주도 수, 정보원별 수. 유튜브면 어떤 영상이었는지 제목 수준으로.</span></li>
+        <li>업체를 찾을 때 뭐라고 검색했나? "인테리어 업체"였나, "욕실 리모델링"처럼 공정 이름이었나? <span class="tag X">X1 특화</span>
+          <span class="m"><b>측정</b> 공정명으로 찾은 사람 수. 가능하면 검색 기록·카페 글 제목을 보여 달라고 한다(관찰).</span></li>
       </ol>
-      <h4>A-2 카드 정렬 (카드 보여주며)</h4>
-      <ol start="9">
-        <li>고통 카드 7장 중 <b>실제로 겪은 것</b>에 전부 체크, 그중 <b>가장 아팠던 3장</b>에 순위. <span class="tag P">P1~P7</span><br>
-          <span class="card">P1 하자 나면 연락 안 됨·책임 회피</span><span class="card">P2 추가비용·견적이 불투명</span><span class="card">P3 누가 진짜 잘하는지 모름</span><span class="card">P4 공사 중 진행 상황 모름</span><span class="card">P5 사진대로 안 나옴</span><span class="card">P6 직접 하다 다시 함(멍청비용)</span><span class="card">P7 전문용어·결정 피로</span></li>
-        <li>기대 카드 6장 중 <b>"이게 있으면 돈을 더 내겠다"</b> 3장에 순위. 얼마나 더(%)? <span class="tag G">G1~G6</span><br>
-          <span class="card">G1 공정별 단가와 근거 공개</span><span class="card">G2 1년 보증 + 6/12개월 점검</span><span class="card">G3 과정 사진·주간 리포트</span><span class="card">G4 고른 사진 그대로 + 확정가</span><span class="card">G5 대표가 직접 시공·직접 책임</span><span class="card">G6 끝나고 자랑할 디테일</span></li>
-        <li>견적서 A(단가만) vs B(단가 + G2 + G5 명시, 8% 높음): 어느 쪽과 계약하겠나? 왜? <span class="tag G">G2·G5</span></li>
+      <h4>A-2 고객 여정대로 겪은 일 (불편 P)</h4>
+      <ol start="5">
+        <li><b>선택</b> 몇 곳을 비교했고 최종 결정에 며칠 걸렸나? 결국 무엇을 보고 골랐나? 더 비싼 곳을 고른 적이 있다면 왜? <span class="tag P">P1</span> <span class="tag X">X3</span>
+          <span class="m"><b>측정</b> 비교 업체 수, 결정 소요일. "누가 잘하는지 몰라서 힘들었다"는 말이 나오면 P1 겪음. 더 비싼 곳을 고른 사람 수 → X3(초저가 제외 타당성).</span></li>
+        <li><b>견적</b> 견적서에 공정별 단가가 있었나, 총액만 있었나? 공사 중 추가비용이 생겼나, 얼마였나? <span class="tag P">P2</span> <span class="tag G">G1</span>
+          <span class="m"><b>측정</b> 추가비용 발생 수와 금액 → P2. 공정별 단가를 요구하거나 비교한 사람 수 → G1 행동.</span></li>
+        <li><b>결정</b> 상담에서 혼자 정해야 했던 것 중 가장 어려웠던 결정은? 이해 안 돼서 다시 물어본 게 있나? <span class="tag P">P3</span>
+          <span class="m"><b>측정</b> 구체 사례가 나오면 P3 겪음. 사례 수.</span></li>
+        <li><b>공사 중</b> 진행 상황을 어떻게 알았나? 현장에 몇 번 갔나? 사진·보고를 받았나, 못 받아서 간 건가? <span class="tag P">P4</span> <span class="tag G">G3</span>
+          <span class="m"><b>측정</b> 현장 방문 횟수. "몰라서 갔다"면 P4 겪음. 보고를 요구했거나 못 받아 직접 간 사람 수 → G3 행동.</span></li>
+        <li><b>결과</b> 레퍼런스 사진을 몇 장 들고 갔나? 그대로 나왔나? 다르게 나온 부분은 어디였고 어떻게 됐나? <span class="tag P">P5</span> <span class="tag G">G4</span>
+          <span class="m"><b>측정</b> 사진 지참 수, 다르게 나온 사람 수 → P5. 사진에 대해 확정가를 받아낸 사람 수 → G4 행동.</span></li>
+        <li><b>사후</b> 하자가 났나? 연락은 됐나, 와서 고쳐줬나, 며칠 걸렸나, 내 돈이 더 들었나? 계약 때 보증·AS 조항을 확인했었나? <span class="tag P">P6</span> <span class="tag G">G2</span>
+          <span class="m"><b>측정</b> 하자 발생 수, 미처리·지연 수, 자비 부담 금액 → P6. 보증·AS 조항을 확인·비교한 사람 수 → G2 행동.</span></li>
+        <li><b>셀프 경로</b> 직접 하거나 따로 업자를 부른 공정이 있나? 그중 다시 했거나 돈을 더 쓴 게 있나? 어느 공정, 얼마? <span class="tag P">P7</span>
+          <span class="m"><b>측정</b> 셀프·반셀프 경험자 수, 그중 재시공·추가 지출 수와 금액 → P7(멍청비용).</span></li>
+        <li><b>대표</b> 공사 기간에 업체 대표를 몇 번 봤나? 안 보여서 생긴 문제가 있었나? <span class="tag G">G5</span>
+          <span class="m"><b>측정</b> 대표 부재로 문제를 겪은 사람 수, 대표가 있는지 미리 확인한 사람 수 → G5 행동.</span></li>
+        <li><b>끝나고</b> 완성 사진을 어디에 올렸거나 누구에게 보여줬나? 어떤 부분을? <span class="tag G">G6</span>
+          <span class="m"><b>측정</b> 올리거나 보여준 사람 수, 보여준 부위(주방·욕실·디테일).</span></li>
       </ol>
-      <h4>A-3 상품 반응 (마지막)</h4>
-      <ol start="12">
-        <li>상품 ① "설비·방수·전기·바닥 + 공정 순서 관리만 맡기고, 마감은 본인이 고르는 패키지" — 쓰겠나? 얼마면 적정? 안 쓴다면 왜? <span class="tag X">상품①</span></li>
-        <li>상품 ② "고른 사진의 디테일을 그대로, 확정가로, 과정 사진과 함께" — 쓰겠나? 어떤 디테일을 가져오겠나? <span class="tag X">상품②</span></li>
-        <li>이 업체를 어디서 봤으면 연락했겠나? (맘카페 / 유튜브 / 블로그 / 지인) <span class="tag X">채널</span></li>
-        <li>우리가 안 물었지만 공사에서 가장 힘들었던 것은?</li>
+      <h4>A-3 카드 정렬 (카드를 보여주며 — 겪은 일 기준)</h4>
+      <ol start="14">
+        <li>불편 카드 7장 중 <b>실제로 겪은 것</b>에 전부 체크하고, 그중 <b>가장 돈·시간을 많이 쓰게 한 3장</b>에 순위. <span class="tag P">P1~P7</span><br>
+          <span class="card">P1 누가 잘하는지 몰라 고르기 어려움</span><span class="card">P2 견적 불투명·추가비용</span><span class="card">P3 혼자 정해야 하는 결정 부담</span><span class="card">P4 공사 중 진행 상황 모름</span><span class="card">P5 사진·요구와 다르게 나옴</span><span class="card">P6 하자 나면 연락 안 됨·책임 회피</span><span class="card">P7 직접 하다 다시 함</span>
+          <span class="m"><b>측정</b> 카드별 겪음 수, Top3 포함 수. 반도체군·기타군 따로 집계 → X4(두 군의 Top3가 겹치는 개수).</span></li>
+        <li>우리가 안 물었지만 공사에서 가장 힘들었던 것은? <span class="m"><b>측정</b> 7장 밖의 불편이 2명 이상에게서 같은 말로 나오면 P8 후보로 적는다.</span></li>
       </ol>
     </div>
 
     <div class="grp">
       <h3>B. 동료 시공자 — 5명</h3>
-      <div class="who">효인이 아는 설비·타일·목공·전기 사장들. 그들이 보는 고객과, 효인과 같이 일할 생각이 있는지.</div>
+      <div class="who">효인 대표가 아는 설비·타일·목공·전기 사장. 그들이 보는 고객, 그들의 운영 방식, 지금까지 실제로 해본 협업.</div>
       <ol start="16">
-        <li>고객이 공사 끝나고 가장 많이 항의하는 게 뭔가? 하자 처리는 보통 어떻게 끝나나? <span class="tag P">P1·P2</span></li>
-        <li>고객이 사진 들고 와서 "이대로"라고 할 때 실제로 그대로 되는 비율은? 안 되는 이유는 보통 뭔가? <span class="tag P">P5</span></li>
-        <li>셀프·반셀프 고객 뒤처리 해본 적 있나? 어느 공정에서 망가져 오나? <span class="tag P">P6</span></li>
-        <li>고통 카드 7장 중 "고객이 실제로 제일 많이 겪는다"고 보는 3장은? (A와 비교용) <span class="tag P">P1~P7</span></li>
-        <li>기초공정을 리후가 책임지고, 마감은 당신 팀이 하는 구조라면 같이 하겠나? 조건은? <span class="tag X">핵심 파트너</span></li>
-        <li>경기 남부에서 "믿고 맡길 기초공정 업체"가 있나? 없다면 왜 없나? <span class="tag P">P3</span></li>
-        <li>당신이 거절하는 현장·고객은 어떤 유형인가? <span class="tag X">배제 세그먼트</span></li>
+        <li>지난 1년 고객이 공사 끝나고 항의한 건이 몇 건? 무엇 때문에? 어떻게 끝났나(무상 보수 / 비용 분담 / 분쟁)? <span class="tag P">P6·P2</span>
+          <span class="m"><b>측정</b> 사람당 항의 건수와 유형. 하자 처리 소요일.</span></li>
+        <li>고객이 사진 들고 와서 "이대로"라고 한 현장이 지난 1년 몇 건? 그중 그대로 된 건 몇 건? 안 된 이유는? <span class="tag P">P5</span>
+          <span class="m"><b>측정</b> 그대로 된 비율(건수/건수).</span></li>
+        <li>셀프·반셀프 하다가 망가져서 온 현장이 지난 1년 몇 건? 어느 공정이었나? <span class="tag P">P7</span>
+          <span class="m"><b>측정</b> 건수와 공정 분포.</span></li>
+        <li>불편 카드 7장 중 "고객이 실제로 제일 많이 겪는다"고 보는 3장은? <span class="tag P">P1~P7</span>
+          <span class="m"><b>측정</b> 카드별 B Top3 수. A의 Top3와 비교 → 업계 상식과 고객 말의 차이.</span></li>
+        <li>지난 1년에 다른 업체와 공정을 나눠서 일한 현장이 있나(한쪽이 기초, 한쪽이 마감)? 몇 건, 어떤 조건(단가·결제·책임)이었나? 문제는? <span class="tag X">X5 파트너</span>
+          <span class="m"><b>측정</b> 분업 경험자 수, 조건을 그대로 적는다. 의향이 아니라 해본 구조만.</span></li>
+        <li>경기 남부에서 지금 "기초공정만 맡기는 업체"가 있나? 있다면 누구, 어떻게 일하나? <span class="tag P">P1</span> <span class="tag X">경쟁</span>
+          <span class="m"><b>측정</b> 거론된 업체 수와 이름. 없다고 하면 그 이유.</span></li>
+        <li>지난 1년에 거절한 현장은 몇 건, 어떤 유형이었나? <span class="tag X">제외 세그먼트</span>
+          <span class="m"><b>측정</b> 거절 유형 분포(최저가 요구 / 과도한 변경 / 셀프 뒤처리 등).</span></li>
       </ol>
+      <div class="obs"><b>관찰 (보여 달라고 한다)</b> ① 최근 견적서 1장 — 공정별 단가가 있나 ② 공정표를 고객에게 주나 ③ 고객 기록(이름·현장·하자 이력)을 어디에 남기나 ④ 하자 접수를 어떻게 받나(전화만 / 양식) ⑤ 디테일 표준(사진·도면)이 있나. <span class="m"><b>측정</b> 5개 중 갖춘 개수 → X7. 3개 이상이면 "프로세스 보유".</span></div>
     </div>
 
     <div class="grp">
       <h3>C. 디자인 스튜디오 대표 — 3~5곳</h3>
-      <div class="who">인쇼 아카데미 인맥, 경기 남부·강남. 상품 ③의 고객.</div>
+      <div class="who">인쇼 아카데미 인맥, 경기 남부·강남. 상품 ③의 고객이자 벤치마킹 대상.</div>
       <ol start="23">
-        <li>지난 1년 시공 때문에 생긴 분쟁·하자·일정 지연이 몇 건? 가장 비쌌던 건? <span class="tag P">P1·P4</span></li>
-        <li>시공 파트너를 바꾼 적 있나? 이유는? 지금 파트너의 불만 1순위는? <span class="tag P">P3</span></li>
-        <li>디자인은 그대로인데 시공에서 디테일이 무너진 경험은? 어느 디테일이 제일 자주? <span class="tag P">P5</span></li>
-        <li>"설비·방수·바닥 + 공정 순서를 책임지고, 주간 리포트와 사진 기록을 주는 협력 시공사"가 있다면 테스트 현장 1건을 맡기겠나? 조건은? <span class="tag G">G3·G5 · 상품③</span></li>
-        <li>그런 시공사에 지금 파트너보다 더 낼 수 있나? 몇 %? <span class="tag G">G2·G5</span></li>
-        <li>기초공정 전문 시공사와 일하면 디자인 회사 입장에서 걱정되는 건? (책임 경계, 소통, 고객 응대) <span class="tag X">수정 포인트</span></li>
+        <li>지난 1년 시공 때문에 생긴 하자·분쟁·일정 지연이 몇 건? 그중 가장 비쌌던 건은 얼마가 들었고 누가 부담했나? <span class="tag P">P6·P4</span>
+          <span class="m"><b>측정</b> 건수, 금액, 부담 주체.</span></li>
+        <li>지난 2년 안에 시공 파트너를 바꾼 적이 있나? 왜 바꿨고, 새 파트너는 무엇을 보고 골랐나? <span class="tag X">X6 상품③</span>
+          <span class="m"><b>측정</b> 바꾼 곳 수, 교체 사유 분포(하자 / 일정 / 소통 / 가격). 고른 기준을 그대로 적는다.</span></li>
+        <li>디자인은 그대로인데 시공에서 무너진 디테일이 지난 1년 몇 건? 어느 디테일(무몰딩·단차·줄눈 등)? <span class="tag P">P5</span>
+          <span class="m"><b>측정</b> 건수와 디테일 종류.</span></li>
+        <li>지금 시공 파트너에게 시공비 외에 추가로 낸 돈이 있나(하자 보수·재시공·지연 보상)? 지난 1년 얼마? <span class="tag G">G2·G5</span>
+          <span class="m"><b>측정</b> 금액. 이 금액이 "책임지는 시공사"에 낼 수 있는 프리미엄의 상한 근거.</span></li>
+        <li>지금 파트너와 책임 경계(어디까지 시공사 책임인지)를 문서로 정해두었나? 문제가 됐던 적은? <span class="tag X">수정 포인트</span>
+          <span class="m"><b>측정</b> 문서화 여부, 분쟁 사례.</span></li>
+      </ol>
+      <div class="obs"><b>관찰</b> B와 같은 5개(견적서·공정표·고객 기록·하자 접수·디테일 표준)를 보여 달라고 한다. 스튜디오는 디자인 표준 문서가 있을 가능성이 높으니 그 형식을 눈으로 본다 — 리후가 만들 게 아니라 가져다 쓸 것. <span class="m"><b>측정</b> 5개 중 갖춘 개수 → X7에 합산.</span></div>
+    </div>
+
+    <div class="grp">
+      <h3>E. 첫 상담 기록 (앞으로 모든 상담에서)</h3>
+      <div class="who">인터뷰가 끝난 뒤에도 계속 쌓이는 자산. 기헌 대표가 첫 통화·방문 때 5분.</div>
+      <ol start="28">
+        <li>어디서 알고 연락했나? 무엇을 보고(사진·영상·소개·가격)? <span class="m"><b>측정</b> 유입 경로별 수.</span></li>
+        <li>지금 집은 몇 년차, 공사 범위는, 예산은 어떻게 정했나(목돈·대출·저축)? <span class="m"><b>측정</b> 세그먼트 일치 여부.</span></li>
+        <li>이전 공사 경험이 있나? 그때 가장 힘들었던 것은? <span class="m"><b>측정</b> P1~P7 중 어디에 해당하는지.</span></li>
+        <li>다른 업체 몇 곳과 비교 중인가? 그 업체들은 뭘 내세우나? <span class="m"><b>측정</b> 비교 업체 수, 경쟁 포인트.</span></li>
       </ol>
     </div>
   </section>
 
+  <!-- ===================== 3. 결과 입력 ===================== -->
   <section id="v-inputs" hidden>
-    <div class="note">고통(P)은 "겪은 사람 수"와 "가장 아팠던 3장에 넣은 사람 수", 기대(G)는 "돈 더 내겠다 3장에 넣은 사람 수"를 넣습니다. 동료 시공자(B)와 스튜디오(C) 답은 별도 칸. 판정 기준은 미리 정해둔 것이라 바꾸지 않습니다. 다 넣으면 4 · 판정에서 <b>시트에 저장</b>.</div>
-    <div class="btns"><label style="flex-direction:row;align-items:center;gap:8px">고객 응답 인원(A) <input type="number" id="nA" min="0" style="width:80px" placeholder="10"></label>
-      <label style="flex-direction:row;align-items:center;gap:8px">동료 시공자(B) <input type="number" id="nB" min="0" style="width:80px" placeholder="5"></label>
-      <label style="flex-direction:row;align-items:center;gap:8px">스튜디오(C) <input type="number" id="nC" min="0" style="width:80px" placeholder="4"></label></div>
-    <h2>고통 — 진짜 아픈가</h2>
+    <div class="note">응답 인원을 먼저 넣고, 불편(P)은 "겪은 사람 수"와 "가장 돈·시간을 쓰게 한 3장에 넣은 수", 요구(G)는 "그렇게 행동한 사람 수"를 넣습니다. 기준은 미리 정해둔 것이라 바꾸지 않습니다. 다 넣으면 4 · 판정에서 <b>시트에 저장</b>.</div>
+    <div class="btns">
+      <label style="flex-direction:row;align-items:center;gap:8px">고객 A 인원 <input type="number" id="nA" min="0" style="width:70px" placeholder="10"></label>
+      <label style="flex-direction:row;align-items:center;gap:8px">그중 반도체군 <input type="number" id="nS" min="0" style="width:70px" placeholder="5"></label>
+      <label style="flex-direction:row;align-items:center;gap:8px">동료 시공자 B <input type="number" id="nB" min="0" style="width:70px" placeholder="5"></label>
+      <label style="flex-direction:row;align-items:center;gap:8px">스튜디오 C <input type="number" id="nC" min="0" style="width:70px" placeholder="4"></label>
+    </div>
+    <h2>시장 크기</h2>
+    <div class="row"><div class="inputs">
+      <label>경기 남부 10년+ 구축 세대수<input type="number" min="0" data-k="m.house" placeholder="예: 180000"></label>
+      <label>5년 내 공사한 사람 수 (A)<input type="number" min="0" data-k="m.did"></label>
+      <label>객단가 (만원, 단가DB 평균)<input type="number" min="0" data-k="m.ticket" placeholder="예: 3000"></label>
+      <label>월 소화 가능 현장 수<input type="number" min="0" data-k="m.sites" placeholder="2"></label>
+    </div><div class="rule">연간 공사 비율 = 5년 내 공사 수 ÷ A 인원 ÷ 5. SAM = 세대수 × 연간 비율 × 객단가. SOM = 월 현장 × 12 × 객단가.</div></div>
+    <h2>불편 — 실제로 겪었나</h2>
     <div id="inP"></div>
-    <h2>기대 — 돈 내고 원하나</h2>
+    <h2>요구 — 그렇게 행동했나</h2>
     <div id="inG"></div>
-    <h2>상품 반응·파트너·채널</h2>
+    <h2>세그먼트·특화·파트너·프로세스 신호</h2>
     <div id="inX"></div>
   </section>
 
+  <!-- ===================== 4. 판정 ===================== -->
   <section id="v-result" hidden>
     <div class="verdict">
       <h2 style="margin-top:0">판정</h2>
@@ -230,9 +354,12 @@ textarea{width:100%;font:inherit;font-size:.9rem;border:1px solid var(--line);ba
         <span class="small" id="sheetmsg"></span>
       </div>
     </div>
-    <h2>VPC 다시 보기 — 확인된 것과 아닌 것</h2>
-    <div class="vpc"><div class="panel"><h3>고객 프로파일</h3><div id="profile2"></div></div><div class="panel"><h3>가치맵</h3><div id="valuemap2"></div></div></div>
-    <div class="note"><b>수업 틀</b> — VPC의 고객 프로파일(일·고통·기대)을 먼저 가설로 적고, 설문으로 Fact로 바꾼 뒤, 가치맵(상품·고통 해소·기대 창출)과 맞는지(Fit) 보는 순서. 맞지 않으면 상품을 바꾸거나(피벗) 세그먼트를 바꾼다. 10명 설문은 통계가 아니라 패턴 탐색.</div>
+    <h2>가치제안 캔버스 <span class="ver" id="vpcver">v1 — 검증 반영</span></h2>
+    <div class="vpcfig" id="vpc1"></div>
+    <div class="legend"><i style="background:var(--ok-bg);border:1px solid var(--ok)"></i>확인됨 <i style="background:var(--mid-bg);border:1px solid var(--mid)"></i>절반 <i style="background:var(--no-bg);border:1px solid var(--no)"></i>아님(취소선) · 회색은 미입력</div>
+    <h2>비즈니스모델 캔버스 <span class="ver">v1 — 검증 반영</span></h2>
+    <div class="bmc" id="bmc1"></div>
+    <div class="note"><b>수업 틀</b> — 고객 프로파일(일·불편·요구)을 가설로 먼저 적고, 인터뷰·관찰로 사실(Fact)로 바꾼 뒤, 가치맵(상품·불편 해소·요구 충족)과 맞는지(Fit) 본다. 맞지 않으면 상품을 바꾸거나(피벗) 세그먼트를 바꾼다. 10명은 통계가 아니라 패턴 탐색이므로 "경향"으로만 말한다.</div>
   </section>
 </div>
 
@@ -240,142 +367,189 @@ textarea{width:100%;font:inherit;font-size:.9rem;border:1px solid var(--line);ba
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzsfEZK133ftvNDnvOpm91hYXHA9KXtswtFKRf_1e-tuyNueGvHkx3rJmP4m2VUBNfM/exec';
 const WHO='백효인';
 
+/* ---------- 가안 데이터 ---------- */
 const JOBS=[
  ['J1','기능','설비·방수·전기 등 되돌릴 수 없는 공정을 하자 없이 끝내기'],
- ['J2','기능','예산 안에서 원하는 디테일(주방·욕실·문선) 구현하기'],
- ['J3','기능','공정 순서와 업체 선택을 결정하기'],
+ ['J2','기능','예산 안에서 원하는 디테일(주방·욕실·문선)을 구현하기'],
+ ['J3','기능','업체와 공정 순서를 고르고 결정하기'],
  ['J4','감정','후회 없는 결정, 공사 중 불안하지 않기'],
  ['J5','사회','집을 보여줬을 때 "잘했다" 소리 듣기'],
 ];
+// 고객 여정 순서. 측정: 겪음(ex) / 가장 돈·시간을 쓰게 한 3장(top)
 const PAINS=[
- ['P1','하자 나면 연락 안 되고 책임을 미룸','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
- ['P2','추가비용이 생기고 견적 근거가 불투명함','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
- ['P3','누가 진짜 잘하는지 알 수 없어 업체 고르기가 어려움','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
- ['P4','공사 중 진행 상황을 몰라 불안함','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
- ['P5','사진을 가져가도 "안 된다"거나 다르게 나옴','겪음 ≥ 40% 그리고 Top3 ≥ 20%'],
- ['P6','직접 하다가 다시 하거나 돈을 더 씀(멍청비용)','셀인 경험자 중 겪음 ≥ 30%'],
- ['P7','전문용어와 결정 피로','겪음 ≥ 50% 그리고 Top3 ≥ 20%'],
+ ['P1','선택','누가 진짜 잘하는지 알 수 없어 업체 고르기가 어려움','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
+ ['P2','견적','견적 근거가 불투명하고 공사 중 추가비용이 생김','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
+ ['P3','결정','상담에서 혼자 정해야 하는 결정이 많아 부담스러움','겪음 ≥ 50% 그리고 Top3 ≥ 20%'],
+ ['P4','공사 중','진행 상황을 알 수 없어 불안함','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
+ ['P5','결과','가져간 사진·요구와 다르게 나옴','겪음 ≥ 40% 그리고 Top3 ≥ 20%'],
+ ['P6','사후','하자가 나면 연락이 안 되거나 책임을 미룸','겪음 ≥ 50% 그리고 Top3 ≥ 30%'],
+ ['P7','셀프 경로','직접 하다가 다시 하거나 돈을 더 씀','셀프 경험자 중 겪음 ≥ 30%'],
 ];
+// 요구는 "그렇게 행동한 사람 수"로 측정
 const GAINS=[
- ['G1','공정별 단가와 근거를 공개','Top3 ≥ 40%'],
- ['G2','1년 보증 + 6/12개월 점검','Top3 ≥ 40%'],
- ['G3','과정 사진·주간 리포트','Top3 ≥ 30%'],
- ['G4','고른 사진 그대로 + 확정가','Top3 ≥ 40%'],
- ['G5','대표가 직접 시공하고 직접 책임','Top3 ≥ 40%'],
- ['G6','끝나고 자랑할 디테일','Top3 ≥ 30%'],
+ ['G1','공정별 단가와 근거','견적서에 공정별 단가를 요구하거나 비교함','행동 ≥ 40%'],
+ ['G2','보증과 점검','계약 때 보증·AS 조항을 확인하고 비교함','행동 ≥ 40%'],
+ ['G3','과정 사진·진행 보고','보고를 요구했거나 못 받아서 직접 현장에 감','행동 ≥ 30%'],
+ ['G4','고른 사진 그대로 + 확정가','사진을 들고 가 그 부분의 확정가를 받아냄','행동 ≥ 40%'],
+ ['G5','대표가 직접 시공하고 책임','대표가 현장에 있는지 확인했거나 없어서 문제를 겪음','행동 ≥ 40%'],
+ ['G6','끝나고 자랑할 디테일','완성 사진을 올리거나 지인에게 보여줌','행동 ≥ 30%'],
 ];
 const PRODUCTS=[
- {id:'S1',name:'① 기초공정 책임 패키지',desc:'설비·방수·전기·바닥 + 공정 순서 관리. 대표 직접, 보증·점검, 공개 단가. 마감은 고객이 고름.',relieves:['P1','P2','P3','P6'],creates:['G1','G2','G5'],segment:'A',xi:0,
-  keep:'1순위 상품으로 유지. 멍청비용 사례와 공개 단가를 전면에.',fix:'확인된 고통만 남기고 패키지를 줄인다 (예: 보증·점검 빼고 단가 공개만, 또는 그 반대).',pivot:'고객이 기초공정을 따로 맡길 생각이 없다 → 상품 ③(스튜디오 협력)로 무게를 옮기거나, 턴키로 간다.'},
- {id:'S2',name:'② 디테일 구현 패키지',desc:'고객이 고른 사진의 디테일(디아망 주방·세라믹·무문선)을 그대로, 확정가로, 과정 사진과 함께.',relieves:['P5','P7'],creates:['G4','G6','G3'],segment:'A',xi:1,
-  keep:'①과 묶어 "기초공정부터 디테일까지 한 사람이 책임" 메시지로.',fix:'디테일 범위를 2~3개(주방·욕실)로 좁혀 확정가를 내기 쉽게.',pivot:'고객이 "그대로"보다 "제안"을 원한다 → 디자이너 영입 없이는 못 함. ②를 빼고 ①③만.'},
- {id:'S3',name:'③ 스튜디오 협력 시공',desc:'디자인 스튜디오의 기초공정·공정관리를 책임지고 주간 리포트·사진 기록을 제공.',relieves:['P1','P4','P5'],creates:['G3','G5'],segment:'C',xi:4,
-  keep:'안정 매출 기반으로 유지. 디테일 포트폴리오 확보 경로.',fix:'책임 경계(어디까지 리후 책임인지)를 계약서 수준으로 정리.',pivot:'스튜디오가 파트너를 바꿀 생각이 없다 → ③ 제외, 고객 직접 수주(①②)만.'},
+ {id:'S1',name:'① 기초공정 책임 패키지',desc:'욕실·방수·설비·전기·바닥 등 되돌릴 수 없는 공정 + 공정 순서 관리. 대표 직접, 보증·점검, 공정별 단가 공개. 마감은 고객이 고름.',relieves:['P1','P2','P6','P7'],creates:['G1','G2','G5'],
+  keep:'1순위 상품으로 유지. "욕실·방수부터"처럼 공정 이름으로 부른다(X1 확인 시). 멍청비용 사례와 공개 단가를 전면에.',fix:'확인된 불편만 남기고 패키지를 줄인다. 예: 보증·점검은 기본 포함으로 숨기고 단가 공개만 내세우거나, 그 반대.',pivot:'고객이 기초공정을 따로 맡긴 경험도 없고 그 불편도 크지 않다 → ①을 접고 ③(스튜디오 협력)이나 부분 리모델링(욕실만)으로 간다.'},
+ {id:'S2',name:'② 디테일 구현 패키지',desc:'고객이 고른 사진의 디테일(무몰딩·무문선·세라믹·주방)을 그대로, 확정가로, 과정 사진과 함께.',relieves:['P3','P5'],creates:['G4','G6','G3'],
+  keep:'①과 묶어 "기초공정부터 디테일까지 한 사람이 책임"으로.',fix:'디테일 범위를 2~3개(주방·욕실)로 좁혀 확정가를 내기 쉽게.',pivot:'사진대로 안 나온 경험(P5)이 드물고 확정가를 받아낸 행동(G4)도 없다 → ②는 상품이 아니라 ①의 설명 문구로만 남긴다.'},
+ {id:'S3',name:'③ 스튜디오 협력 시공',desc:'디자인 스튜디오의 기초공정·공정관리를 책임지고 주간 보고·사진 기록을 제공.',relieves:['P4','P5','P6'],creates:['G3','G5'],
+  keep:'안정 매출 기반으로 유지. 디테일 포트폴리오를 얻는 경로.',fix:'책임 경계를 계약서 수준으로 문서화(C-27 답변 반영).',pivot:'스튜디오가 최근 파트너를 바꾼 적이 없고 추가 지출도 없다 → ③ 제외, 고객 직접 수주만.'},
 ];
 const XIN=[
- {id:'X1',label:'상품 ① 쓰겠다 (A, 명)',rule:'≥ 50%',judge:(v,n)=>n.A?v/n.A>=0.5:null,note:'질문 12'},
- {id:'X2',label:'상품 ② 쓰겠다 (A, 명)',rule:'≥ 40%',judge:(v,n)=>n.A?v/n.A>=0.4:null,note:'질문 13'},
- {id:'X3',label:'견적서 B(보증·대표 직접, 8%↑) 선택 (A, 명)',rule:'≥ 60%',judge:(v,n)=>n.A?v/n.A>=0.6:null,note:'질문 11'},
- {id:'X4',label:'동료 시공자 중 협업 의향 (B, 명)',rule:'≥ 2명',judge:(v,n)=>n.B?v>=2:null,note:'질문 20 · 핵심 파트너'},
- {id:'X5',label:'스튜디오 중 테스트 현장 동의 (C, 곳)',rule:'≥ 2곳',judge:(v,n)=>n.C?v>=2:null,note:'질문 26 · 상품③'},
- {id:'X6',label:'맘카페·지인에서 봤으면 연락했겠다 (A, 명)',rule:'≥ 50%면 채널 = 후기·소개',judge:(v,n)=>n.A?v/n.A>=0.5:null,note:'질문 14'},
+ {id:'X1',label:'업체를 공정 이름(욕실·타일 등)으로 검색한 사람 (A)',den:'A',rule:'≥ 40%면 상품 이름을 공정으로',q:'A-4',judge:(v,n)=>n.A?v/n.A>=0.4:null},
+ {id:'X2',label:'목돈을 실제로 집에 쓴 사람 (A, 목돈 받은 사람 중)',den:'X2n',rule:'≥ 50%면 성과급 세그먼트 유지',q:'A-2',extra:['X2n','목돈 받은 사람 수'],judge:(v,n,S)=>{const d=Number(S['X2n'])||0;return d?v/d>=0.5:null}},
+ {id:'X3',label:'더 비싼 업체를 고른 적 있는 사람 (A)',den:'A',rule:'≥ 50%면 초저가 제외가 맞음',q:'A-5',judge:(v,n)=>n.A?v/n.A>=0.5:null},
+ {id:'X4',label:'반도체군 Top3와 기타군 Top3가 겹치는 개수 (0~3)',den:null,rule:'≤ 1이면 특화(불편이 다름), ≥ 2면 축소(같음 → 채널로만)',q:'A-14',judge:(v,n,S)=>{if(S['X4']===undefined||S['X4']==='')return null;return v<=1}},
+ {id:'X5',label:'지난 1년 분업 구조로 일해본 동료 시공자 (B)',den:'B',rule:'≥ 2명이면 파트너 구조 현실성 있음',q:'B-20',judge:(v,n)=>n.B?v>=2:null},
+ {id:'X6',label:'지난 2년 시공 파트너를 바꾼 스튜디오 (C)',den:'C',rule:'≥ 2곳이면 ③ 수요 있음',q:'C-24',judge:(v,n)=>n.C?v>=2:null},
+ {id:'X7',label:'프로세스 5종 중 3개 이상 갖춘 업체 (B+C)',den:'X7n',rule:'≤ 30%면 공개 단가·보고가 당분간 차별점',q:'관찰',extra:['X7n','관찰한 업체 수'],judge:(v,n,S)=>{const d=Number(S['X7n'])||0;return d?v/d<=0.3:null}},
+];
+const BMC=[
+ ['kp','핵심 파트너',['전속 시공팀(목공·타일·전기)|X5','하이엔드 디자인 스튜디오 2~3곳 — ③의 고객이자 파트너|X6','자재상(세라믹·석재·주방)','세무사(외주)']],
+ ['ka','핵심 활동',['되돌릴 수 없는 공정 직접 시공','공정 사진·주간 보고 기록|G3','6/12개월 점검|G2','첫 상담·사후 기록(표준 프로세스 = 기본기)']],
+ ['kr','핵심 자원 (베끼기 어려운 것)',['효인 대표의 손 — 기초공정 + 디테일 구현|G5','현장마다 쌓이는 기록(사진·단가·고객의 말)','전속팀·스튜디오와의 관계|X5']],
+ ['vp','가치제안 ← VPC 왼쪽',['① 기초공정 책임 패키지|S1','② 디테일 구현 패키지|S2','③ 스튜디오 협력 시공|S3']],
+ ['cr','고객 관계',['대표 얼굴이 있는 책임|G5','주간 보고|G3','점검 방문 → 후기·소개|G2']],
+ ['ch','채널',['기존 고객 소개','맘카페 후기','유튜브(기헌) 공정 교육','스튜디오 소개(③)|X6']],
+ ['cs','고객 세그먼트 ← VPC 오른쪽',['1순위: 경기 남부 10년+ 구축, 목돈 생긴 반도체 종사자 부부, 하자·추가비용에 데인 사람|X2','2순위: 시공 하자로 고생하는 디자인 스튜디오|X6','제외: 최저가만 찾는 고객, 디자인 제안을 원하는 고객|X3']],
+ ['cost','비용 구조',['인건비(대표·시공팀), 자재','보증·점검 충당금(매출의 일정 %)','견적·보고 도구, 세무 외주']],
+ ['rev','수익 구조',['①② 패키지 시공비 = 원가 × (1+가산율), 단가 공개|G1','③ 스튜디오 협력 시공비(안정 매출)|X6','점검·AS는 보증 내 무상, 이후 유상']],
 ];
 
+/* ---------- state ---------- */
 let S={};
-try{S=JSON.parse(localStorage.getItem('lihu-vpc')||'{}')||{}}catch(e){S={}}
-function save(){try{localStorage.setItem('lihu-vpc',JSON.stringify(S))}catch(e){}}
+try{S=JSON.parse(localStorage.getItem('lihu-vpc2')||'{}')||{}}catch(e){S={}}
+function save(){try{localStorage.setItem('lihu-vpc2',JSON.stringify(S))}catch(e){}}
 const num=k=>Number(S[k])||0;
-const N=()=>({A:num('nA'),B:num('nB'),C:num('nC')});
+const N=()=>({A:num('nA'),S:num('nS'),B:num('nB'),C:num('nC')});
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
-const PTH={P1:[.5,.3],P2:[.5,.3],P3:[.5,.3],P4:[.5,.3],P5:[.4,.2],P7:[.5,.2]};
+const PTH={P1:[.5,.3],P2:[.5,.3],P3:[.5,.2],P4:[.5,.3],P5:[.4,.2],P6:[.5,.3]};
 const GTH={G1:.4,G2:.4,G3:.3,G4:.4,G5:.4,G6:.3};
 function stP(id){const n=N();
-  if(id==='P6'){const se=num('P6.selfn');if(!se)return null;return num('P6.ex')/se>=0.3?'ok':'no'}
+  if(id==='P7'){const se=num('P7.selfn');if(!se)return null;return num('P7.ex')/se>=0.3?'ok':'no'}
   if(!n.A)return null;const ex=num(id+'.ex')/n.A,top=num(id+'.top')/n.A;const th=PTH[id];
   if(ex>=th[0]&&top>=th[1])return'ok';if(ex>=th[0]||top>=th[1])return'mid';return'no'}
-function stG(id){const n=N();if(!n.A)return null;const t=num(id+'.top')/n.A;const th=GTH[id];return t>=th?'ok':(t>=th*0.6?'mid':'no')}
-function stX(x){const r=x.judge(num(x.id),N());return r===null?null:(r?'ok':'no')}
+function stG(id){const n=N();if(!n.A)return null;const t=num(id+'.act')/n.A;const th=GTH[id];return t>=th?'ok':(t>=th*0.6?'mid':'no')}
+function stX(x){const r=x.judge(num(x.id),N(),S);return r===null?null:(r?'ok':'no')}
+const stOf=ref=>{if(!ref)return null;ref=ref.trim();if(/^P/.test(ref))return stP(ref);if(/^G/.test(ref))return stG(ref);if(/^X/.test(ref)){const x=XIN.find(x=>x.id===ref);return x?stX(x):null}if(/^S/.test(ref)){const p=PRODUCTS.find(p=>p.id===ref);const s=prodStatus(p);return s.score===null?null:s.cls}return null};
 const lab=s=>s==='ok'?'확인됨':s==='no'?'아님':s==='mid'?'절반':'미입력';
 
-function renderProfile(el,withStatus){
-  let h='';
-  JOBS.forEach(([id,k,t])=>{h+=`<div class="item"><span class="id J">${id}</span><div>${t}<span class="link">${k}의 일</span></div></div>`});
-  PAINS.forEach(([id,t])=>{const s=withStatus?stP(id):null;const rel=PRODUCTS.filter(p=>p.relieves.includes(id)).map(p=>p.name.slice(0,1)).join('');h+=`<div class="item"><span class="id P">${id}</span><div>${t}${withStatus&&s?`<span class="st ${s}">${lab(s)}</span>`:''}<span class="link">줄여주는 상품: ${rel||'없음'}</span></div></div>`});
-  GAINS.forEach(([id,t])=>{const s=withStatus?stG(id):null;const cr=PRODUCTS.filter(p=>p.creates.includes(id)).map(p=>p.name.slice(0,1)).join('');h+=`<div class="item"><span class="id G">${id}</span><div>${t}${withStatus&&s?`<span class="st ${s}">${lab(s)}</span>`:''}<span class="link">만들어주는 상품: ${cr||'없음'}</span></div></div>`});
-  el.innerHTML=h;
+/* ---------- 그림: VPC ---------- */
+function vpcFig(el,live){
+  const chip=(cls,id,txt,ref)=>{const s=live?stOf(ref||id):null;return`<span class="chip ${cls} ${s||''}"><b>${id}</b>${txt}</span>`};
+  const sq=`<div class="square">
+    <div class="zone prods"><h4>상품 · 서비스</h4>${PRODUCTS.map(p=>chip('',p.id,`${p.name}<br><span class="small">(${p.relieves.join(' ')} / ${p.creates.join(' ')})</span>`,p.id)).join('')}</div>
+    <div class="zone"><h4 class="P">불편을 줄이는 것</h4>${PAINS.map(([id,st,t])=>chip('P',id,'↓ '+t.split(' ').slice(0,4).join(' ')+'…',id)).join('')}</div>
+    <div class="zone"><h4 class="G">요구를 채우는 것</h4>${GAINS.map(([id,t])=>chip('G',id,'↑ '+t,id)).join('')}</div>
+  </div>`;
+  const ci=`<div class="circle">
+    <div class="zone pains"><h4 class="P">불편 (Pains)</h4>${PAINS.map(([id,st,t])=>chip('P',id,`<span class="small">[${st}]</span> ${t}`,id)).join('')}</div>
+    <div class="zone gains"><h4 class="G">요구 (Gains)</h4>${GAINS.map(([id,t,b])=>chip('G',id,`${t}<br><span class="small">행동: ${b}</span>`,id)).join('')}</div>
+    <div class="zone jobs"><h4 class="J">일 (Jobs)</h4>${JOBS.map(([id,k,t])=>chip('J',id,`<span class="small">[${k}]</span> ${t}`,null)).join('')}</div>
+  </div>`;
+  el.innerHTML=sq+'<div class="arrow">⇄</div>'+ci;
 }
-function renderValueMap(el,withStatus){
-  el.innerHTML=PRODUCTS.map(p=>{const s=withStatus?prodStatus(p):null;return`<div class="item"><span class="id J">${p.id}</span><div><b>${p.name}</b>${withStatus&&s&&s.score!==null?`<span class="st ${s.cls}">${s.label}</span>`:''}<br>${p.desc}<span class="link">고통 해소: ${p.relieves.join(' ')} · 기대 창출: ${p.creates.join(' ')} · 대상: ${p.segment==='A'?'고객':'스튜디오'}</span></div></div>`}).join('');
+/* ---------- 그림: BMC ---------- */
+function bmcFig(el,live){
+  el.innerHTML=BMC.map(([cls,title,items])=>`<div class="c ${cls}"><b>${title}</b><ul>${items.map(it=>{const [txt,ref]=it.split('|');const s=live&&ref?stOf(ref):null;return`<li class="${s||''}">${txt}${s?` <span class="small">(${lab(s)})</span>`:''}</li>`}).join('')}</ul></div>`).join('');
 }
 
+/* ---------- 시장 크기 ---------- */
+function market(){
+  const n=N();const house=num('m.house'),did=num('m.did'),ticket=num('m.ticket'),sites=num('m.sites');
+  const rate=(n.A&&did)?did/n.A/5:0;const sam=house*rate*ticket;const som=sites*12*ticket;
+  const f=v=>v>=10000?(v/10000).toFixed(1)+'억':Math.round(v).toLocaleString()+'만';
+  document.getElementById('mk').innerHTML=`
+   <div class="k"><b>전체 시장 TAM</b><div class="v">약 37조</div><div class="small">건산연 2025 전망</div></div>
+   <div class="k"><b>연간 공사 비율</b><div class="v">${rate?(rate*100).toFixed(1)+'%':'—'}</div><div class="small">5년 내 공사 ${did||'—'} / A ${n.A||'—'} ÷ 5</div></div>
+   <div class="k"><b>유효 시장 SAM</b><div class="v">${sam?f(sam)+'원':'—'}</div><div class="small">${house?house.toLocaleString()+'세대':'세대수 미입력'} × 비율 × 객단가</div></div>
+   <div class="k"><b>수익 시장 SOM</b><div class="v">${som?f(som)+'원':'—'}</div><div class="small">월 ${sites||'—'}현장 × 12 × ${ticket?ticket.toLocaleString()+'만':'—'}${sam&&som?` · SAM의 ${(som/sam*100).toFixed(2)}%`:''}</div></div>`;
+}
+
+/* ---------- 입력 ---------- */
 function renderInputs(){
-  ['nA','nB','nC'].forEach(k=>{document.getElementById(k).value=S[k]??''});
-  document.getElementById('inP').innerHTML=PAINS.map(([id,t,rule])=>{const s=stP(id);return`<div class="row ${s||''}" id="r-${id}"><header><b>${id}. ${t}</b><span class="pill ${s||''}">${lab(s)}</span></header>
-    <div class="inputs">${id==='P6'?`<label>셀인·반셀프 해본 사람(A)<input type="number" min="0" data-k="P6.selfn" value="${esc(S['P6.selfn']??'')}"></label>`:''}<label>겪은 사람 수(A)<input type="number" min="0" data-k="${id}.ex" value="${esc(S[id+'.ex']??'')}"></label>${id!=='P6'?`<label>가장 아팠던 3장에 넣은 수(A)<input type="number" min="0" data-k="${id}.top" value="${esc(S[id+'.top']??'')}"></label>`:''}<label>동료 시공자가 Top3로 꼽은 수(B)<input type="number" min="0" data-k="${id}.b" value="${esc(S[id+'.b']??'')}"></label></div>
+  ['nA','nS','nB','nC'].forEach(k=>{document.getElementById(k).value=S[k]??''});
+  document.querySelectorAll('#v-inputs input[data-k^="m."]').forEach(el=>{el.value=S[el.dataset.k]??''});
+  document.getElementById('inP').innerHTML=PAINS.map(([id,st,t,rule])=>{const s=stP(id);return`<div class="row ${s||''}" id="r-${id}"><header><b>${id}. [${st}] ${t}</b><span class="pill ${s||''}">${lab(s)}</span></header>
+    <div class="inputs">${id==='P7'?`<label>셀프·반셀프 경험자 수(A)<input type="number" min="0" data-k="P7.selfn" value="${esc(S['P7.selfn']??'')}"></label>`:''}<label>겪은 사람 수(A)<input type="number" min="0" data-k="${id}.ex" value="${esc(S[id+'.ex']??'')}"></label>${id!=='P7'?`<label>Top3에 넣은 수(A)<input type="number" min="0" data-k="${id}.top" value="${esc(S[id+'.top']??'')}"></label>`:''}<label>그중 반도체군 겪음 수<input type="number" min="0" data-k="${id}.exS" value="${esc(S[id+'.exS']??'')}"></label><label>동료 시공자 Top3 수(B)<input type="number" min="0" data-k="${id}.b" value="${esc(S[id+'.b']??'')}"></label><label>돈·시간 피해 합계(만원·일, 메모)<input type="number" min="0" data-k="${id}.cost" value="${esc(S[id+'.cost']??'')}"></label></div>
     <div class="rule">기준: ${rule}</div>
-    <label>들은 말 그대로 (근거)<textarea data-k="${id}.ev" placeholder="예: 'AS 전화 세 번 했는데 안 왔다' (동탄 ○○, 12년차)">${esc(S[id+'.ev']??'')}</textarea></label></div>`}).join('');
-  document.getElementById('inG').innerHTML=GAINS.map(([id,t,rule])=>{const s=stG(id);return`<div class="row ${s||''}" id="r-${id}"><header><b>${id}. ${t}</b><span class="pill ${s||''}">${lab(s)}</span></header>
-    <div class="inputs"><label>"돈 더 내겠다" 3장에 넣은 수(A)<input type="number" min="0" data-k="${id}.top" value="${esc(S[id+'.top']??'')}"></label><label>더 내겠다는 평균 %(A)<input type="number" min="0" data-k="${id}.pct" value="${esc(S[id+'.pct']??'')}"></label></div>
+    <label>들은 말 그대로<textarea data-k="${id}.ev" placeholder="예: 'AS 전화 세 번 했는데 안 왔다' (영통 ○○, 12년차, 반도체)">${esc(S[id+'.ev']??'')}</textarea></label></div>`}).join('');
+  document.getElementById('inG').innerHTML=GAINS.map(([id,t,b,rule])=>{const s=stG(id);return`<div class="row ${s||''}" id="r-${id}"><header><b>${id}. ${t}</b><span class="pill ${s||''}">${lab(s)}</span></header>
+    <div class="small">행동 기준: ${b}</div>
+    <div class="inputs"><label>그렇게 행동한 사람 수(A)<input type="number" min="0" data-k="${id}.act" value="${esc(S[id+'.act']??'')}"></label><label>그중 반도체군<input type="number" min="0" data-k="${id}.actS" value="${esc(S[id+'.actS']??'')}"></label></div>
     <div class="rule">기준: ${rule}</div>
-    <label>들은 말 그대로 (근거)<textarea data-k="${id}.ev">${esc(S[id+'.ev']??'')}</textarea></label></div>`}).join('');
-  document.getElementById('inX').innerHTML=XIN.map(x=>{const s=stX(x);return`<div class="row ${s||''}" id="r-${x.id}"><header><b>${x.label}</b><span class="pill ${s||''}">${lab(s)}</span></header>
-    <div class="inputs"><label>수<input type="number" min="0" data-k="${x.id}" value="${esc(S[x.id]??'')}"></label></div><div class="rule">기준: ${x.rule} · ${x.note}</div>
+    <label>들은 말 그대로<textarea data-k="${id}.ev">${esc(S[id+'.ev']??'')}</textarea></label></div>`}).join('');
+  document.getElementById('inX').innerHTML=XIN.map(x=>{const s=stX(x);return`<div class="row ${s||''}" id="r-${x.id}"><header><b>${x.id}. ${x.label}</b><span class="pill ${s||''}">${lab(s)}</span></header>
+    <div class="inputs">${x.extra?`<label>${x.extra[1]}<input type="number" min="0" data-k="${x.extra[0]}" value="${esc(S[x.extra[0]]??'')}"></label>`:''}<label>수<input type="number" min="0" data-k="${x.id}" value="${esc(S[x.id]??'')}"></label></div><div class="rule">기준: ${x.rule} · 문항 ${x.q}</div>
     <label>조건·이유 (들은 말)<textarea data-k="${x.id}.ev">${esc(S[x.id+'.ev']??'')}</textarea></label></div>`}).join('');
-  document.querySelectorAll('#v-inputs input[data-k],#v-inputs textarea[data-k]').forEach(el=>el.addEventListener('input',e=>{S[e.target.dataset.k]=e.target.value;save();refresh()}));
-  ['nA','nB','nC'].forEach(k=>document.getElementById(k).addEventListener('input',e=>{S[k]=e.target.value;save();refresh()}));
+  document.querySelectorAll('#v-inputs input[data-k],#v-inputs textarea[data-k]').forEach(el=>{el.oninput=e=>{S[e.target.dataset.k]=e.target.value;save();refresh()}});
+  ['nA','nS','nB','nC'].forEach(k=>document.getElementById(k).oninput=e=>{S[k]=e.target.value;save();refresh()});
 }
 function setRow(id,s){const r=document.getElementById('r-'+id);if(!r)return;r.className='row '+(s||'');const p=r.querySelector('.pill');p.className='pill '+(s||'');p.textContent=lab(s)}
-function refresh(){PAINS.forEach(([id])=>setRow(id,stP(id)));GAINS.forEach(([id])=>setRow(id,stG(id)));XIN.forEach(x=>setRow(x.id,stX(x)));renderResult()}
+function refresh(){PAINS.forEach(([id])=>setRow(id,stP(id)));GAINS.forEach(([id])=>setRow(id,stG(id)));XIN.forEach(x=>setRow(x.id,stX(x)));market();renderResult()}
 
+/* ---------- 판정 ---------- */
 function prodStatus(p){
   const items=[...p.relieves.map(stP),...p.creates.map(stG)];
   const known=items.filter(s=>s!==null);if(!known.length)return{cls:'',label:'미입력',score:null};
   const score=known.reduce((a,s)=>a+(s==='ok'?1:s==='mid'?0.5:0),0)/known.length;
-  const x=stX(XIN[p.xi]);let cls,label;
-  if(score>=0.67&&x!=='no'){cls='ok';label='유지'}else if(score>=0.4||x==='ok'){cls='mid';label='수정'}else{cls='no';label='피벗'}
-  return{cls,label,score,x,known:known.length,total:items.length};
+  let cls,label;if(score>=0.67){cls='ok';label='유지'}else if(score>=0.4){cls='mid';label='수정'}else{cls='no';label='피벗'}
+  return{cls,label,score,known:known.length,total:items.length};
 }
 function renderResult(){
   const n=N();const ps=PRODUCTS.map(p=>({p,s:prodStatus(p)}));
   const done=[...PAINS.map(([id])=>stP(id)),...GAINS.map(([id])=>stG(id))].filter(s=>s!==null).length;
   let pos;
-  if(!n.A&&!n.C)pos='아직 입력 전입니다. 고객 10명 카드 정렬 결과부터 넣으면 상품별 유지·수정·피벗이 나옵니다.';
-  else{
-    const k=ps.filter(x=>x.s.label==='유지').map(x=>x.p.name.slice(0,1)),f=ps.filter(x=>x.s.label==='수정').map(x=>x.p.name.slice(0,1)),v=ps.filter(x=>x.s.label==='피벗').map(x=>x.p.name.slice(0,1));
+  if(!n.A&&!n.C)pos='아직 입력 전입니다. 고객 10명의 여정 응답과 카드 정렬 결과부터 넣으면 상품별 유지·수정·피벗과 두 캔버스의 갱신본이 나옵니다.';
+  else{const k=ps.filter(x=>x.s.label==='유지').map(x=>x.p.name.slice(0,1)),f=ps.filter(x=>x.s.label==='수정').map(x=>x.p.name.slice(0,1)),v=ps.filter(x=>x.s.label==='피벗').map(x=>x.p.name.slice(0,1));
     pos=`유지 ${k.join('')||'—'} · 수정 ${f.join('')||'—'} · 피벗 ${v.join('')||'—'}`;
     const tp=PAINS.filter(([id])=>stP(id)==='ok').map(([id])=>id),tg=GAINS.filter(([id])=>stG(id)==='ok').map(([id])=>id);
-    if(tp.length||tg.length)pos+=` — 확인된 고통 ${tp.join(' ')||'없음'}, 확인된 기대 ${tg.join(' ')||'없음'}`;
-  }
+    pos+=` — 확인된 불편 ${tp.join(' ')||'없음'}, 확인된 요구 ${tg.join(' ')||'없음'}`;}
   document.getElementById('pos').textContent=pos;
-  document.getElementById('prods').innerHTML=ps.map(({p,s})=>`<div class="prod ${s.cls}"><b>${p.name} — ${s.label}${s.score!==null?` (${Math.round(s.score*100)}% 확인, ${s.known}/${s.total}항목)`:''}</b><span class="m">${s.label==='유지'?p.keep:s.label==='수정'?p.fix:s.label==='피벗'?p.pivot:'고통·기대 숫자를 넣으면 판정됨'}</span></div>`).join('');
+  document.getElementById('prods').innerHTML=ps.map(({p,s})=>`<div class="prod ${s.cls}"><b>${p.name} — ${s.label}${s.score!==null?` (${Math.round(s.score*100)}% 확인, ${s.known}/${s.total}항목)`:''}</b><span class="d">${s.label==='유지'?p.keep:s.label==='수정'?p.fix:s.label==='피벗'?p.pivot:'불편·요구 숫자를 넣으면 판정됨'}</span></div>`).join('');
   const sig=[];
   const okP=PAINS.filter(([id])=>stP(id)==='ok').length,inP=PAINS.filter(([id])=>stP(id)!==null).length;
-  if(inP>=5&&okP<=1)sig.push('고객 10명이 우리가 정의한 고통을 거의 안 느낌 → 세그먼트가 틀렸을 가능성. 구축 10년+ 대신 "매수 직후" 또는 "거주 중 수리"로 대상을 바꿔 다시 묻는다.');
-  if(stP('P1')==='ok'&&stG('G2')==='no')sig.push('하자(P1)는 아프다는데 보증(G2)에 돈은 안 낸다 → 보증을 가격에 녹이지 말고 기본 포함, 메시지는 "대표 직접"(G5)으로.');
-  if(stG('G4')==='ok'&&stP('P5')!=='ok')sig.push('"그대로 구현"(G4)은 원하는데 사진대로 안 나온 경험(P5)은 적다 → ②는 후킹 메시지로만 쓰고 상품은 ①에 묶는다.');
-  if(stX(XIN[4])==='ok'&&stX(XIN[0])==='no')sig.push('스튜디오는 원하고 고객은 ①을 안 산다 → B2B(③) 중심으로 피벗, 고객 직접 수주는 후순위.');
-  if(stX(XIN[3])==='no'&&n.B)sig.push('동료 시공자가 협업을 안 하겠다 → 전속 시공팀 없이 ①을 못 돌림. 조건(단가·결제·책임)을 다시 설계.');
+  if(inP>=5&&okP<=1)sig.push('고객 10명이 우리가 정의한 불편을 거의 안 겪었다 → 세그먼트가 틀렸을 가능성. "매수 직후" 또는 "부분 리모델링(욕실만)" 고객으로 대상을 바꿔 다시 묻는다.');
+  const x4=stX(XIN[3]);if(x4==='no')sig.push('반도체군과 기타군의 불편 Top3가 같다 → 반도체 특화는 시장 축소. 세그먼트를 "경기 남부 10년+ 구축 거주자"로 넓히고 반도체는 채널(사내 커뮤니티·패밀리넷)로만 쓴다.');
+  if(x4==='ok')sig.push('반도체군의 불편이 다르다 → 특화 성립. 그 차이(어떤 카드가 달랐나)를 상품 설명과 메시지에 그대로 쓴다.');
+  if(stX(XIN[1])==='no')sig.push('목돈이 생겨도 집에 안 쓴다 → "성과급 고객" 가정 제거. 거주 중 수리·입주 전 공사 시점으로 세그먼트를 재정의한다.');
+  if(stP('P6')==='ok'&&stG('G2')==='no')sig.push('하자(P6)는 아팠는데 보증 조항을 확인한 행동(G2)은 없다 → 고객은 보증을 "찾지" 않는다. 보증은 기본 포함하고 메시지는 대표 직접(G5)으로.');
+  if(stG('G4')==='ok'&&stP('P5')!=='ok')sig.push('확정가를 받아내는 행동(G4)은 있는데 사진대로 안 나온 경험(P5)은 적다 → ②는 ①의 설명 문구로 흡수.');
+  if(stX(XIN[5])==='ok'&&prodStatus(PRODUCTS[0]).cls==='no')sig.push('스튜디오는 파트너를 바꾸고 있고 고객 쪽 ①은 안 선다 → B2B(③) 중심으로 피벗.');
+  if(stX(XIN[4])==='no')sig.push('동료 시공자 중 분업 구조로 일해본 사람이 없다 → 전속 시공팀 없이 ①을 못 돌린다. 조건(단가·결제·책임)을 먼저 설계해 1현장 시험.');
+  if(stX(XIN[6])==='ok')sig.push('관찰한 업체 대부분이 프로세스가 없다 → 공개 단가·주간 보고가 당분간 차별점. 단, 베끼기 쉬우니 기록 축적과 대표 시공력을 같이 내세운다.');
+  if(stX(XIN[6])==='no')sig.push('프로세스를 갖춘 업체가 많다 → 프로세스는 기본기. 차별점을 효인 대표의 시공력과 공정 특화(X1)로만 세운다.');
   const bTop=PAINS.map(([id])=>[id,num(id+'.b')]).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id])=>id);
   const aTop=PAINS.map(([id])=>[id,num(id+'.top')]).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id])=>id);
-  if(bTop.length>=2&&aTop.length>=2){const same=bTop.filter(x=>aTop.includes(x)).length;if(same<=1)sig.push(`동료 시공자가 보는 고객 고통(${bTop.join(' ')})과 고객이 말한 고통(${aTop.join(' ')})이 다름 → 업계 상식이 고객과 어긋나는 지점. 고객 쪽을 믿고, 그 차이를 메시지로 쓴다.`)}
+  if(bTop.length>=2&&aTop.length>=2){const same=bTop.filter(x=>aTop.includes(x)).length;if(same<=1)sig.push(`동료 시공자가 보는 고객 불편(${bTop.join(' ')})과 고객이 말한 불편(${aTop.join(' ')})이 다르다 → 업계 상식이 고객과 어긋나는 지점. 고객 쪽을 믿는다.`)}
   document.getElementById('pivot').innerHTML=sig.length?`<b>피벗 신호</b><br>${sig.join('<br>')}`:'';
-  document.getElementById('progtxt').textContent=`고통·기대 ${done} / ${PAINS.length+GAINS.length} 판정됨 · 응답 A ${n.A||0} / B ${n.B||0} / C ${n.C||0}`;
-  renderProfile(document.getElementById('profile2'),true);renderValueMap(document.getElementById('valuemap2'),true);
+  document.getElementById('progtxt').textContent=`불편·요구 ${done} / ${PAINS.length+GAINS.length} 판정됨 · 응답 A ${n.A||0}(반도체 ${n.S||0}) / B ${n.B||0} / C ${n.C||0}`;
+  vpcFig(document.getElementById('vpc1'),true);bmcFig(document.getElementById('bmc1'),true);
 }
 
-const VIEWS=['plan','sheet','inputs','result'];
-function route(){let h=(location.hash||'#plan').slice(1);if(!VIEWS.includes(h))h='plan';VIEWS.forEach(v=>{document.getElementById('v-'+v).hidden=v!==h});document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+h))}
+/* ---------- tabs ---------- */
+const VIEWS=['why','plan','sheet','inputs','result'];
+function route(){let h=(location.hash||'#why').slice(1);if(!VIEWS.includes(h))h='why';VIEWS.forEach(v=>{document.getElementById('v-'+v).hidden=v!==h});document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+h))}
 window.addEventListener('hashchange',route);
 
+/* ---------- sheet ---------- */
 (function(){
   const msg=document.getElementById('sheetmsg');
+  const keysP=id=>['ex','top','exS','b','cost','ev',...(id==='P7'?['selfn']:[])];
   document.getElementById('savesheet').addEventListener('click',async()=>{
     const ts=new Date().toISOString();const n=N();const rows=[];
-    rows.push({ts,who:WHO,hid:'N',title:'응답 인원',inputs:`A=${n.A} | B=${n.B} | C=${n.C}`,status:'',pos:'',raw:JSON.stringify({nA:S.nA??'',nB:S.nB??'',nC:S.nC??''})});
-    PAINS.forEach(([id,t])=>rows.push({ts,who:WHO,hid:id,title:t,inputs:`겪음=${S[id+'.ex']??''} | Top3=${S[id+'.top']??''} | 시공자Top3=${S[id+'.b']??''}${id==='P6'?` | 셀인경험=${S['P6.selfn']??''}`:''}${S[id+'.ev']?` | 근거: ${S[id+'.ev']}`:''}`,status:lab(stP(id)),pos:'',raw:JSON.stringify({ex:S[id+'.ex']??'',top:S[id+'.top']??'',b:S[id+'.b']??'',selfn:S[id+'.selfn']??'',ev:S[id+'.ev']??''})}));
-    GAINS.forEach(([id,t])=>rows.push({ts,who:WHO,hid:id,title:t,inputs:`Top3=${S[id+'.top']??''} | 추가지불%=${S[id+'.pct']??''}${S[id+'.ev']?` | 근거: ${S[id+'.ev']}`:''}`,status:lab(stG(id)),pos:'',raw:JSON.stringify({top:S[id+'.top']??'',pct:S[id+'.pct']??'',ev:S[id+'.ev']??''})}));
-    XIN.forEach(x=>rows.push({ts,who:WHO,hid:x.id,title:x.label,inputs:`${S[x.id]??''}${S[x.id+'.ev']?` | ${S[x.id+'.ev']}`:''}`,status:lab(stX(x)),pos:'',raw:JSON.stringify({v:S[x.id]??'',ev:S[x.id+'.ev']??''})}));
+    rows.push({ts,who:WHO,hid:'N',title:'응답 인원·시장',inputs:`A=${n.A} 반도체=${n.S} B=${n.B} C=${n.C} | 세대수=${S['m.house']??''} 5년내공사=${S['m.did']??''} 객단가=${S['m.ticket']??''} 월현장=${S['m.sites']??''}`,status:'',pos:'',raw:JSON.stringify({nA:S.nA??'',nS:S.nS??'',nB:S.nB??'',nC:S.nC??'',house:S['m.house']??'',did:S['m.did']??'',ticket:S['m.ticket']??'',sites:S['m.sites']??''})});
+    PAINS.forEach(([id,st,t])=>{const o={};keysP(id).forEach(k=>o[k]=S[id+'.'+k]??'');rows.push({ts,who:WHO,hid:id,title:`[${st}] ${t}`,inputs:keysP(id).filter(k=>k!=='ev').map(k=>`${k}=${o[k]}`).join(' | ')+(o.ev?` | ${o.ev}`:''),status:lab(stP(id)),pos:'',raw:JSON.stringify(o)})});
+    GAINS.forEach(([id,t])=>{const o={act:S[id+'.act']??'',actS:S[id+'.actS']??'',ev:S[id+'.ev']??''};rows.push({ts,who:WHO,hid:id,title:t,inputs:`행동=${o.act} | 반도체=${o.actS}${o.ev?` | ${o.ev}`:''}`,status:lab(stG(id)),pos:'',raw:JSON.stringify(o)})});
+    XIN.forEach(x=>{const o={v:S[x.id]??'',ev:S[x.id+'.ev']??''};if(x.extra)o.den=S[x.extra[0]]??'';rows.push({ts,who:WHO,hid:x.id,title:x.label,inputs:`${o.v}${o.den!==undefined?` / ${o.den}`:''}${o.ev?` | ${o.ev}`:''}`,status:lab(stX(x)),pos:'',raw:JSON.stringify(o)})});
     PRODUCTS.forEach(p=>{const s=prodStatus(p);rows.push({ts,who:WHO,hid:p.id,title:p.name,inputs:s.score!==null?`${Math.round(s.score*100)}% 확인`:'',status:s.label,pos:document.getElementById('pos').textContent,raw:'{}'})});
     msg.textContent='저장 중…';
     try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({rows})});msg.textContent=`저장됨 (${new Date().toLocaleTimeString('ko-KR')}) — 시트 '백효인' 탭`}catch(e){msg.textContent='저장 실패. 인터넷 연결을 확인하고 다시 눌러 주세요.'}
@@ -385,17 +559,16 @@ window.addEventListener('hashchange',route);
     try{const r=await fetch(SHEET_URL);const d=await r.json();const latest={};
       d.rows.filter(x=>x.who===WHO).forEach(x=>{if(!latest[x.hid]||x.ts>latest[x.hid].ts)latest[x.hid]=x});
       let c=0;Object.values(latest).forEach(x=>{let o={};try{o=JSON.parse(x.raw||'{}')}catch(e){}
-        if(x.hid==='N'){S.nA=o.nA;S.nB=o.nB;S.nC=o.nC}
-        else if(/^P\d/.test(x.hid)){S[x.hid+'.ex']=o.ex;S[x.hid+'.top']=o.top;S[x.hid+'.b']=o.b;S[x.hid+'.ev']=o.ev;if(x.hid==='P6')S['P6.selfn']=o.selfn}
-        else if(/^G\d/.test(x.hid)){S[x.hid+'.top']=o.top;S[x.hid+'.pct']=o.pct;S[x.hid+'.ev']=o.ev}
-        else if(/^X\d/.test(x.hid)){S[x.hid]=o.v;S[x.hid+'.ev']=o.ev}else return;c++});
-      save();renderInputs();renderResult();msg.textContent=`불러옴: ${c}개 항목`}
+        if(x.hid==='N'){S.nA=o.nA;S.nS=o.nS;S.nB=o.nB;S.nC=o.nC;S['m.house']=o.house;S['m.did']=o.did;S['m.ticket']=o.ticket;S['m.sites']=o.sites}
+        else if(/^P\d/.test(x.hid)){Object.entries(o).forEach(([k,v])=>S[x.hid+'.'+k]=v)}
+        else if(/^G\d/.test(x.hid)){S[x.hid+'.act']=o.act;S[x.hid+'.actS']=o.actS;S[x.hid+'.ev']=o.ev}
+        else if(/^X\d/.test(x.hid)){S[x.hid]=o.v;S[x.hid+'.ev']=o.ev;const xx=XIN.find(q=>q.id===x.hid);if(xx&&xx.extra&&o.den!==undefined)S[xx.extra[0]]=o.den}else return;c++});
+      save();renderInputs();refresh();msg.textContent=`불러옴: ${c}개 항목`}
     catch(e){msg.innerHTML='불러오기 실패('+esc(e&&e.message||e)+'). <a href="'+SHEET_URL+'" target="_blank" rel="noopener">이 링크</a>가 JSON을 보여주면 정상입니다.'}
   });
 })();
 
-renderProfile(document.getElementById('profile'),false);
-renderValueMap(document.getElementById('valuemap'),false);
-renderInputs();renderResult();route();
+vpcFig(document.getElementById('vpc0'),false);bmcFig(document.getElementById('bmc0'),false);
+renderInputs();market();renderResult();route();
 </script>
 </html>
