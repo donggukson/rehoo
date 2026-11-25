@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>WL 인테리어 랩 · 사전 설문 응답 받기</title>
+<style>
+:root{--paper:#F8FAFC;--ink:#0F172A;--sub:#64748B;--line:#E2E8F0;--line2:#CBD5E1;--acc:#047857;--soft:#ECFDF5;--bad:#B42318;--badsoft:#FEF3F2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 "Pretendard Variable","Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:-.011em;word-break:keep-all}
+button,input{font:inherit;color:inherit}
+main{max-width:860px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:24px;margin:0 0 4px;letter-spacing:-.02em}
+p.lead{color:var(--sub);margin:0 0 20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+label{font-size:13px;font-weight:600;color:var(--sub);flex:1;min-width:220px}
+input[type=password]{display:block;width:100%;margin-top:6px;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:16px}
+.btn{border:0;border-radius:10px;background:var(--ink);color:#fff;font-weight:700;padding:11px 18px;min-height:46px;cursor:pointer}
+.btn.line{background:#fff;color:var(--ink);border:1px solid var(--line2);font-weight:600}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:14px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.msg{border-radius:10px;padding:12px 14px;margin-top:14px;font-size:14.5px;background:var(--soft);color:#065F46}
+.msg.bad{background:var(--badsoft);color:var(--bad)}
+.tw{overflow-x:auto;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12.5px;color:var(--sub);font-weight:600}
+td.w{white-space:normal;min-width:180px}
+.note{color:var(--sub);font-size:13.5px}
+ol{padding-left:20px;margin:8px 0 0}
+</style>
+</head>
+<body>
+<main>
+  <h1>사전 설문 응답 받기</h1>
+  <p class="lead">고객이 보낸 사전 설문을 JSON 파일로 내려받습니다. 받은 파일은 상담 도구의 현장 화면에서 "사전 설문 불러오기"로 넣습니다.</p>
+  <div class="card">
+    <form class="row" id="f">
+      <label>받기 암호<input type="password" id="key" autocomplete="current-password" required></label>
+      <button class="btn" type="submit" id="go">응답 불러오기</button>
+    </form>
+    <p class="note" style="margin:12px 0 0">암호는 구글 시트의 Apps Script 에 적어 둔 값입니다. 이 페이지에는 저장되지 않습니다.</p>
+    <div id="msg"></div>
+  </div>
+  <div class="card" id="list" style="margin-top:16px" hidden></div>
+  <div class="card" style="margin-top:16px">
+    <b>암호 없이 한 건만 넣으려면</b>
+    <ol class="note"><li>구글 시트의 "사전설문" 탭(예전 코드에서는 "기타" 탭)을 엽니다.</li><li>그 고객 줄의 맨 오른쪽 raw 칸을 복사합니다.</li><li>상담 도구의 "사전 설문 불러오기"에서 붙여넣기 칸에 붙입니다.</li></ol>
+  </div>
+</main>
+<script>
+'use strict';
+var SHEET_URL = 'https://script.google.com/macros/s/AKfycbzsfEZK133ftvNDnvOpm91hYXHA9KXtswtFKRf_1e-tuyNueGvHkx3rJmP4m2VUBNfM/exec';
+var ROWS = [];
+var $ = function (s) { return document.querySelector(s); };
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function say(text, bad) { $('#msg').innerHTML = text ? '<div class="msg' + (bad ? ' bad' : '') + '" role="status">' + text + '</div>' : ''; }
+function save(name, data) {
+  var a = document.createElement('a'), url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+}
+function fileName(p) { return '사전설문_' + String((p.customer || {}).name || '고객').replace(/[\\/:*?"<>|\s]+/g, '') + '_' + String(p.at || '').slice(0, 10) + '.json'; }
+function draw() {
+  var box = $('#list'); box.hidden = false;
+  if (!ROWS.length) { box.innerHTML = '<p class="note" style="margin:0">아직 받은 응답이 없습니다.</p>'; return; }
+  box.innerHTML = '<div class="row" style="justify-content:space-between;align-items:center"><b>응답 ' + ROWS.length + '건</b><button type="button" class="btn line sm" id="all">전부 한 파일로 받기</button></div><div class="tw"><table><tr><th>받은 날</th><th>고객</th><th>연락처</th><th>단지 · 평형</th><th></th></tr>'
+    + ROWS.map(function (p, i) { var c = p.customer || {}, h = p.home || {}; return '<tr><td>' + esc(String(p.at || '').slice(0, 10)) + '</td><td>' + esc(c.name) + '</td><td>' + esc(c.phone) + '</td><td class="w">' + esc([h.complex, h.type, h.unit].filter(Boolean).join(' · ')) + '</td><td><button type="button" class="btn sm" data-i="' + i + '">JSON 받기</button></td></tr>'; }).join('') + '</table></div>';
+}
+$('#f').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var btn = $('#go'); btn.disabled = true; say('불러오는 중…');
+  /* 암호는 주소가 아니라 본문에 넣어 보낸다 */
+  fetch(SHEET_URL, { method: 'POST', body: JSON.stringify({ action: 'survey', key: $('#key').value }) })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      btn.disabled = false;
+      if (d && d.error === 'bad_key') return say('암호가 맞지 않습니다.', true);
+      if (d && d.error === 'no_key') return say('시트 코드에 받기 암호가 아직 비어 있습니다. Apps Script 의 맨 위 SURVEY_KEY 에 암호를 적고 새 버전으로 배포해 주세요.', true);
+      if (!d || !Array.isArray(d.surveys)) return say('시트 코드가 예전 판이라 여기서 받을 수 없습니다. 저장소의 sheet/Code.gs 를 Apps Script 에 붙이고 새 버전으로 배포해 주세요. 그 전에는 아래 "암호 없이 한 건만 넣으려면" 방법을 쓰면 됩니다.', true);
+      ROWS = d.surveys.sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); });
+      say(''); draw();
+    })
+    .catch(function (err) { btn.disabled = false; say('불러오지 못했습니다 (' + esc(err && err.message || err) + '). 인터넷 연결을 확인해 주세요.', true); });
+});
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.i !== undefined) { var p = ROWS[+b.dataset.i]; save(fileName(p), p); }
+  if (b.id === 'all') save('사전설문_전체_' + new Date().toISOString().slice(0, 10) + '.json', { kind: 'wl-presurvey-list', surveys: ROWS });
+});
+</script>
+</body>
+</html>
