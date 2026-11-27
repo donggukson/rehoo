@@ -142,7 +142,13 @@ function atom(t) {
 }
 function shown(q) { return !q.show_if || q.show_if.split('|').some(function (g) { return g.split('&').every(function (p) { return atom(p.trim()); }); }); }
 /* 보이지 않게 된 문항의 답은 지운다 (지우면 다른 문항이 또 숨을 수 있어 바뀌지 않을 때까지 돈다) */
+/* 상담 도구와 같은 파생 답: 입주 희망일이 오늘보다 뒤면 아직 들어가지 않은 집 (move_future). 문항은 아니고 조건식에만 쓴다 */
+function derive() {
+  var fut = S.ans.own && S.ans.own !== '살고 있는 집' && S.ans.d_move && S.ans.d_move > todayIso();
+  S.ans.move_future = fut ? '예' : '아니요';
+}
 function prune() {
+  derive();
   for (var n = 0; n < 6; n++) {
     var cut = false;
     STAGES.forEach(function (st) { st.questions.forEach(function (q) { if (S.ans[q.key] != null && !shown(q)) { delete S.ans[q.key]; cut = true; } }); });
@@ -271,7 +277,7 @@ function render() {
   var m = $('#main'), foot = $('#foot'), steps = $('#steps'), p = S.page, last = LAST();
   if (p === 0) {
     steps.hidden = true; foot.hidden = false;
-    m.innerHTML = '<section class="hero"><h1>미팅 전에 5분만<br><em>어떻게 사시는지</em> 알려 주세요.</h1><p class="lead">미리 답해 주시면, 미팅에서는 질문 대신 도면과 사진을 보며 바로 설계 이야기를 나눕니다.</p><ul><li><b>01</b><span>집과 연락처</span></li>' + STAGES.map(function (st, i) { return '<li><b>0' + (i + 2) + '</b><span>' + esc(st.title) + '</span></li>'; }).join('') + '</ul><p class="note">고르는 문항이 대부분이라 금방 끝납니다. 쓰시던 답은 이 기기에 남아 있어 나중에 이어서 하실 수 있습니다.</p></section>';
+    m.innerHTML = '<section class="hero"><h1>미팅 전에 7분만<br><em>어떻게 사시는지</em> 알려 주세요.</h1><p class="lead">미리 답해 주시면, 미팅에서는 질문 대신 도면과 사진을 보며 바로 설계 이야기를 나눕니다.</p><ul><li><b>01</b><span>집과 연락처</span></li>' + STAGES.map(function (st, i) { return '<li><b>0' + (i + 2) + '</b><span>' + esc(st.title) + '</span></li>'; }).join('') + '</ul><p class="note">고르는 문항이 대부분이라 금방 끝납니다. 쓰시던 답은 이 기기에 남아 있어 나중에 이어서 하실 수 있습니다.</p></section>';
     $('#footIn').innerHTML = '<button type="button" class="big go" data-page="1">' + (Object.keys(S.ans).length ? '이어서 하기' : '시작하기') + '</button>';
     return;
   }
@@ -297,7 +303,8 @@ function payload() {
   var ans = {};
   STAGES.forEach(function (st) { st.questions.forEach(function (q) { var v = String(S.ans[q.key] || '').trim(); if (v && shown(q)) ans[q.key] = v; }); });
   var id = 'ps-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
-  return { kind: 'wl-presurvey', v: 1, id: id, at: new Date().toISOString(), customer: { name: (S.home.name || '').trim(), phone: (S.home.phone || '').trim() }, home: { complex: (S.home.complex || '').trim(), type: (S.home.type || '').trim(), unit: (S.home.unit || '').trim() }, ans: ans, note: S.note.trim() };
+  var keys = []; STAGES.forEach(function (st) { st.questions.forEach(function (q) { keys.push(q.key); }); });
+  return { kind: 'wl-presurvey', v: 2, keys: keys, id: id, at: new Date().toISOString(), customer: { name: (S.home.name || '').trim(), phone: (S.home.phone || '').trim() }, home: { complex: (S.home.complex || '').trim(), type: (S.home.type || '').trim(), unit: (S.home.unit || '').trim() }, ans: ans, note: S.note.trim() };
 }
 function send() {
   if (S.sending) return;
