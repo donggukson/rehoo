@@ -565,6 +565,25 @@ window.SURVEY_STAGES = [
     ]
    },
    {
+    "key": "show_hide",
+    "kind": "single",
+    "label": "물건과 소품은 어떻게 두고 싶으세요?",
+    "options": [
+     {
+      "value": "전부 숨김",
+      "label": "전부 문 뒤로 숨기고 싶음"
+     },
+     {
+      "value": "몇 점만",
+      "label": "고른 몇 점만 보이게"
+     },
+     {
+      "value": "진열",
+      "label": "좋아하는 물건은 보이게 진열"
+     }
+    ]
+   },
+   {
     "key": "furniture",
     "kind": "single",
     "label": "가구는 어떤 구성으로 완성할까요?",
@@ -637,6 +656,39 @@ window.SURVEY_STAGES = [
      },
      {
       "value": "세탁기는 새로 구입"
+     }
+    ]
+   },
+   {
+    "key": "appl_list",
+    "kind": "multi",
+    "label": "공사 뒤에 쓰실 가전을 모두 골라 주세요.",
+    "help": "전기 선과 자리를 공사 전에 잡아야 해서 여쭙니다. 지금 쓰시는 것과 새로 사실 것 모두입니다.",
+    "options": [
+     {
+      "value": "인덕션"
+     },
+     {
+      "value": "식기세척기"
+     },
+     {
+      "value": "오븐",
+      "label": "오븐·스팀오븐"
+     },
+     {
+      "value": "건조기"
+     },
+     {
+      "value": "의류관리기"
+     },
+     {
+      "value": "로봇청소기"
+     },
+     {
+      "value": "시스템에어컨"
+     },
+     {
+      "value": "해당 없음"
      }
     ]
    }
