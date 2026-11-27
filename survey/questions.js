@@ -688,6 +688,9 @@ window.SURVEY_STAGES = [
       "value": "시스템에어컨"
      },
      {
+      "value": "음식물 처리기"
+     },
+     {
       "value": "해당 없음"
      }
     ]
