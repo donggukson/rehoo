@@ -278,7 +278,10 @@ function render() {
   if (p === 0) {
     steps.hidden = true; foot.hidden = false;
     m.innerHTML = '<section class="hero"><h1>미팅 전에 7분만<br><em>어떻게 사시는지</em> 알려 주세요.</h1><p class="lead">미리 답해 주시면, 미팅에서는 질문 대신 도면과 사진을 보며 바로 설계 이야기를 나눕니다.</p><ul><li><b>01</b><span>집과 연락처</span></li>' + STAGES.map(function (st, i) { return '<li><b>0' + (i + 2) + '</b><span>' + esc(st.title) + '</span></li>'; }).join('') + '</ul><p class="note">고르는 문항이 대부분이라 금방 끝납니다. 쓰시던 답은 이 기기에 남아 있어 나중에 이어서 하실 수 있습니다.</p></section>';
-    $('#footIn').innerHTML = '<button type="button" class="big go" data-page="1">' + (Object.keys(S.ans).length ? '이어서 하기' : '시작하기') + '</button>';
+    // 이 기기에 쓰던 답이 남아 있으면 (매장 태블릿처럼 여러 분이 쓰는 기기) 처음부터 새로 쓸 수 있게 한다 (2026-11-28)
+    var had = hasDraft();
+    if (had) m.innerHTML += '<p class="lead" style="margin-top:14px;font-size:14px">이 기기에 쓰던 답이 남아 있습니다. 다른 분이시면 <b>처음부터 새로 쓰기</b>를 눌러 주세요.</p>';
+    $('#footIn').innerHTML = (had ? '<button type="button" class="big line" id="fresh">처음부터 새로 쓰기</button>' : '') + '<button type="button" class="big go" data-page="1">' + (had ? '이어서 하기' : '시작하기') + '</button>';
     return;
   }
   if (p > last) {
@@ -291,6 +294,21 @@ function render() {
   steps.innerHTML = names.map(function (n, i) { return '<div class="' + (i + 1 === p ? 'on' : i + 1 < p ? 'done' : '') + '"' + (i + 1 === p ? ' aria-current="step"' : '') + '>' + (i + 1) + ' ' + esc(n) + '</div>'; }).join('');
   m.innerHTML = p === 1 ? homeHtml() : p === last ? reviewHtml() : stageHtml(STAGES[p - 2]);
   $('#footIn').innerHTML = '<button type="button" class="big line" data-page="' + (p - 1) + '">이전</button>' + (p === last ? '<button type="button" class="big go" id="send"' + (S.sending ? ' disabled' : '') + '>' + (S.sending ? '보내는 중…' : '보내기') + '</button>' : '<button type="button" class="big" id="next">다음</button>');
+}
+function hasDraft() {
+  if (Object.keys(S.ans).length || S.note) return true;
+  for (var k in S.home) if (S.home[k]) return true;
+  return false;
+}
+function freshStart(b) {
+  if (b.getAttribute('data-armed') !== '1') {
+    b.setAttribute('data-armed', '1'); b.textContent = '한 번 더 누르면 지워집니다';
+    setTimeout(function () { if (document.body.contains(b)) { b.setAttribute('data-armed', ''); b.textContent = '처음부터 새로 쓰기'; } }, 4000);
+    return;
+  }
+  S.home = {}; S.ans = {}; S.note = ''; S.agree = false; S.missOn = false; S.error = '';
+  try { localStorage.removeItem(DRAFT); } catch (e) {}
+  S.page = 0; render(); window.scrollTo(0, 0);
 }
 function goPage(p) { S.page = p; S.missOn = false; S.error = ''; render(); window.scrollTo(0, 0); }
 function next() {
@@ -325,6 +343,7 @@ document.addEventListener('click', function (e) {
   if (d.page !== undefined) return goPage(+d.page);
   if (b.id === 'next') return next();
   if (b.id === 'send') return send();
+  if (b.id === 'fresh') return freshStart(b);
   if (d.rng || d.rngact || d.rngnav || d.rngclear) {
     rangeClick(d); prune(); keep();
     var y1 = window.scrollY; render(); window.scrollTo(0, y1);
